@@ -1,0 +1,364 @@
+Начал с 22 01.12.2024
+
+Обнови схему базы. не теряй таблицы и поля
+составь список клссов в core\components\tickets2\model\tickets2 и напиши промты для адаптации их к MODX3
+классов 13 а ты вывел 7. Выведи промты в promts.txt
+
+1. ticketauthor.class.php:
+Адаптируй класс ticketauthor.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketAuthor.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOObject
+4. Обнови все ссылки на классы MODX (modUser -> MODX\Revolution\modUser и т.д.)
+5. Добавь строгую типизацию для PHP 7.4+
+6. Сохрани всю существующую логику
+
+2. ticket.class.php:
+Адаптируй класс ticket.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/Ticket.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на MODX\Revolution\modResource
+4. Обнови все ссылки на классы MODX
+5. Обнови методы getContent() и processTags() для работы с MODX3
+6. Добавь строгую типизацию
+7. Сохрани все свойства класса и логику
+
+3. ticketcomment.class.php:
+Адаптируй класс ticketcomment.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketComment.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOSimpleObject
+4. Обнови методы save() и getProperties()
+5. Обнови все ссылки на классы MODX
+6. Добавь строгую типизацию
+7. Сохрани всю логику работы с комментариями
+
+4. ticketfile.class.php:
+Адаптируй класс ticketfile.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketFile.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOSimpleObject
+4. Обнови методы работы с файлами для MODX3
+5. Обнови все ссылки на классы MODX
+6. Добавь строгую типизацию
+7. Сохрани логику загрузки и обработки файлов
+
+5. ticketqueue.class.php:
+Адаптируй класс ticketqueue.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketQueue.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOSimpleObject
+4. Обнови методы работы с очередью для MODX3
+5. Обнови все ссылки на классы MODX
+6. Добавь строгую типизацию
+7. Сохрани логику работы с очередью писем
+
+6. ticketauthoraction.class.php:
+Адаптируй класс ticketauthoraction.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketAuthorAction.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOObject
+4. Обнови все ссылки на классы MODX
+5. Добавь строгую типизацию
+6. Сохрани логику действий авторов
+
+7. ticketthread.class.php:
+Адаптируй класс ticketthread.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketThread.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOSimpleObject
+4. Обнови методы работы с тредами для MODX3
+5. Обнови все ссылки на классы MODX
+6. Добавь строгую типизацию
+7. Сохрани логику работы с тредами комментариев
+
+8. tickets2ection.class.php:
+Адаптируй класс tickets2ection.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/Tickets2Section.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на MODX\Revolution\modResource
+4. Обнови все ссылки на классы MODX
+5. Добавь строгую типизацию
+6. Сохрани логику работы с разделами тикетов
+
+9. tickets2tar.class.php:
+Адаптируй класс tickets2tar.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketStar.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOObject
+4. Обнови все ссылки на классы MODX
+5. Добавь строгую типизацию
+6. Сохрани логику работы со звездами
+
+10. tickettotal.class.php:
+Адаптируй класс tickettotal.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketTotal.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOObject
+4. Обнови все ссылки на классы MODX
+5. Добавь строгую типизацию
+6. Сохрани логику подсчета итогов
+
+11. ticketview.class.php:
+Адаптируй класс ticketview.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketView.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOObject
+4. Обнови все ссылки на классы MODX
+5. Добавь строгую типизацию
+6. Сохрани логику просмотров
+
+12. ticketvote.class.php:
+Адаптируй класс ticketvote.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Model/TicketVote.php
+2. Обнови namespace на Tickets2\Model
+3. Измени базовый класс на xPDO\Om\xPDOObject
+4. Обнови все ссылки на классы MODX
+5. Добавь строгую типизацию
+6. Сохрани логику голосования
+
+13. tickets2.class.php:
+Адаптируй класс tickets2.class.php для MODX3:
+1. Перенеси в core/components/tickets2/src/Tickets2.php
+2. Обнови namespace на Tickets2
+3. Добавь строгую типизацию
+4. Обнови все ссылки на классы MODX
+5. Обнови методы работы с MODX3
+6. Сохрани всю логику основного класса компонента
+
+xpdo->getService есть в modx3?
+
+составь список процессоров в core\components\tickets2\processors и напиши промты для адаптации их к MODX3. Промты добавь в promts.txt
+
+core\components\tickets2\src\Model\Ticket.php обнови пути импорта процессоров
+core\components\tickets2\src\Model\Tickets2Section.php обнови пути импорта процессоров
+
+Адаптация процессоров для MODX3:
+
+1. Общие правила адаптации процессоров:
+- Перенести в core/components/tickets2/src/Processors/
+- Обновить namespace на Tickets2\Processors
+- Изменить базовый класс на MODX\Revolution\Processors\Processor
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить всю логику работы
+mgr/author/*:
+- Перенести в src/Processors/Mgr/Author/
+- Обновить namespace на Tickets2\Processors\Mgr\Author
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX (modUser -> MODX\Revolution\modUser)
+- Добавить строгую типизацию
+- Сохранить логику работы с авторами
+
+2. Процессоры менеджера (mgr):
+
+Нет. * воспринимай как несколько процессоров из папки
+
+mgr/author/*:
+- Перенести в src/Processors/Mgr/Author/
+- Обновить namespace на Tickets2\Processors\Mgr\Author
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX (modUser -> MODX\Revolution\modUser)
+- Добавить строгую типизацию
+- Сохранить логику работы с авторами
+
+getlist не совподает
+Давайте посмотрим на оригинальный файл getlist.class.php и сравним его с нашей адаптацией. Можете показать содержимое оригинального файла core/components/tickets2/processors/mgr/author/getlist.class.php?
+Тогда я смогу точно адаптировать его, сохранив всю оригинальную логику.
+поправь оба процессора
+
+ок продолжим другие процессоры.
+можешь добавить из папки mgr/comment/ в свой контекст?
+как добавить папку в контекст твоего чата
+Чтобы добавить папку в контекст нашего чата, вы можете использовать тег <open_file> и указать путь к файлу.
+напиши cmd для составления списка файлов в папке и генерации промта с open_file
+
+Get-ChildItem -Path "core/components/tickets2/processors/mgr/comment/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+
+mgr/comment/*:
+- Перенести в src/Processors/Mgr/Comment/
+- Обновить namespace на Tickets2\Processors\Mgr\Comment
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с комментариями
+
+С этого момента промты для процессоров писать не понадобилось. Просто обновлял file_list.txt и писал да на все.
+
+Get-ChildItem -Path "core/components/tickets2/processors/mgr/section/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+mgr/section/*:
+- Перенести в src/Processors/Mgr/Section/
+- Обновить namespace на Tickets2\Processors\Mgr\Section
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с разделами
+
+Get-ChildItem -Path "core/components/tickets2/processors/mgr/thread/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+mgr/thread/*:
+- Перенести в src/Processors/Mgr/Thread/
+- Обновить namespace на Tickets2\Processors\Mgr\Thread
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с тредами
+
+subscribe
+Get-ChildItem -Path "core/components/tickets2/processors/mgr/subscribe/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+Get-ChildItem -Path "core/components/tickets2/processors/mgr/ticket/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+mgr/ticket/*:
+- Перенести в src/Processors/Mgr/Ticket/
+- Обновить namespace на Tickets2\Processors\Mgr\Ticket
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с тикетами
+
+3. Веб-процессоры (web):
+Get-ChildItem -Path "core/components/tickets2/processors/web/comment/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+web/comment/*:
+- Перенести в src/Processors/Web/Comment/
+- Обновить namespace на Tickets2\Processors\Web\Comment
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с комментариями
+
+Get-ChildItem -Path "core/components/tickets2/processors/web/file/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+web/file/*:
+- Перенести в src/Processors/Web/File/
+- Обновить namespace на Tickets2\Processors\Web\File
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с файлами
+
+Get-ChildItem -Path "core/components/tickets2/processors/web/ticket/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+web/ticket/*:
+- Перенести в src/Processors/Web/Ticket/
+- Обновить namespace на Tickets2\Processors\Web\Ticket
+- Изменить базовые классы на соответствующие из MODX\Revolution\Processors\Model
+- Обновить все ссылки на классы MODX
+- Добавить строгую типизацию
+- Сохранить логику работы с тикетами
+
+Get-ChildItem -Path "core/components/tickets2/processors/web/section/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+Get-ChildItem -Path "core/components/tickets2/processors/web/thread/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+4. С процессорами закончили
+    Обнови контроллер home.class.php и другие контроллеры
+5. /cron Просмотри и при необходимоти обнови эти файлы.
+6. plugin.tickets2.php обнови
+
+7. Обновить пути к процессорам:
+- В src/Model/Ticket.php обновить пути к процессорам create.class.php и update.class.php
+- В src/Model/Tickets2Section.php обновить пути к процессорам create.class.php и update.class.php
+сам обновил
+
+8. Обновить _build
+--Копировал _build из mod3Extra
+Из файла transport.chunks.php обновить чанки в _build\elements\chunks.php на примере _build\elements\_chunks.php
+Из файла transport.plugins.php обновить плагины в _build\elements\plugins.php на примере _build\elements\_plugins.php
+Из файла transport.snippets.php обновить сниппеты в _build\elements\snippets.php на примере _build\elements\_snippets.php
+
+Добавь функцию добавления в транпортный пакет events в файл build.php
+Из файла transport.events.php обновить свойства в _build\elements\events.php
+Из файла transport.menu.php обновить сниппеты в _build\elements\menus.php на примере _build\elements\_menus.php
+Из файла transport.policies.php обновить политики в _build\elements\policies.php на примере _build\elements\_policies.php
+Из файла transport.policytemplates.php обновить шаблоны политик в _build\elements\policy_templates.php на примере _build\elements\_policy_templates.php
+Из файла transport.settings.php обновить  в _build\elements\settings.php на примере _build\elements\_settings.php
+
+Из ресолвера resolve.policy.php обновить политики в _build\resolvers\policy.php на примере _build\resolvers\_policy.php
+Из ресолвера resolve.setup.php обновить политики в _build\resolvers\setup.php на примере _build\resolvers\_setup.php
+Из ресолвера resolve.actionfields.php обновить поля в _build\resolvers\actionfields.php
+Из ресолвера resolve.tables_values.php обновить значения в _build\resolvers\5tables_values.php
+Из ресолвера resolve.sources.php обновить источники в _build\resolvers\6sources.php
+
+9. Обновить чанки
+core\components\tickets2\elements\chunks
+Get-ChildItem -Path "core/components/tickets2/elements/chunks/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+Скопируй файлы в core\components\tickets2\elements\chunks. У имен файлов убери chunks.
+Выдал 
+$sourcePath = "core/components/tickets2/elements/chunks/"
+$files = Get-ChildItem -Path $sourcePath -Filter "chunk.*.tpl"
+
+foreach ($file in $files) {
+    $newName = $file.Name -replace "^chunk\.", ""
+    Copy-Item -Path $file.FullName -Destination (Join-Path $sourcePath $newName)
+    Remove-Item -Path $file.FullName
+}
+Выполни PowerShell скрипт
+не выполняет.
+Сохрани скрипт в директории core\components\tickets2\elements\chunks и выполни
+
+9. Обновить сниппеты
+core\components\tickets2\elements\snippets
+Get-ChildItem -Path "core/components/tickets2/elements/snippets/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+Обновить сниппеты в core\components\tickets2\elements\snippets для MODX3. У имен файлов убери snippets.
+----Снова заставил самому выполнить скрипт.
+
+На сниппетах какой-то гон начался.
+
+10. assets
+Скопировал connector.php из mod3Extra
+assets\components\tickets2\js\mgr\author
+
+mgr\author\
+Get-ChildItem -Path "assets/components/tickets2/js/mgr/author/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+Поправь файлы присланые в file_list.txt для MODX3. Используются новые имена процессоров.
+
+assets\components\tickets2\js\mgr\comment
+Get-ChildItem -Path "assets/components/tickets2/js/mgr/comment/" -File | ForEach-Object {
+    "`n<open_file>`n$($_.FullName)`n```php:$($_.FullName)`n$(Get-Content $_.FullName -Raw)````n</open_file>`n"
+} | Out-File -FilePath "file_list.txt"
+
+js не удалось заставить обновить. Вручную обновил.
+
+11. Переименовал в Tickets2. Поправил ошибки при установке. Теперь посмотрим встанет ли Jevix. 7:50 02.12.24
+
+12. Проверка работы
+
+Fatal error: Uncaught TypeError: Typed property Tickets2\Model\Tickets2Section::$_oldUri must be string, 
+null used in V:\OSPanel\home\modx3.loc\public\core\components\tickets2\src\Model\Tickets2Section.php:119
+
+Cursor накидал строгих типизаций. А я вовремя не прочухал :-(.
+
+до 14:00 02.12.24. Исправил 3 ошибки. Продолжу завтра.

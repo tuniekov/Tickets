@@ -1,3 +1,3 @@
-## Tickets
+## Tickets2
 
-Tickets system for MODX Revolution
+Tickets2 system for MODX Revolution
