@@ -3,10 +3,10 @@
 namespace Tickets2\Processors\Web\Ticket;
 
 use MODX\Revolution\modResource;
-// use MODX\Revolution\Processors\Resource\Delete;
+use MODX\Revolution\Processors\Resource\Delete as DeleteResource;
 use Tickets2\Model\Ticket;
 
-class Delete extends MODX\Revolution\Processors\Resource\Delete
+class Delete extends DeleteResource
 {
     public $classKey = Ticket::class;
     public $permission = 'ticket_delete';
@@ -14,7 +14,7 @@ class Delete extends MODX\Revolution\Processors\Resource\Delete
     /**
      * @return bool
      */
-    public function checkPermissions(): bool
+    public function checkPermissions()
     {
         $id = $this->getProperty('id', false);
         $this->resource = $this->modx->getObject(modResource::class, $id);

@@ -19,7 +19,7 @@ class Remove extends RemoveProcessor
     /**
      * @return bool
      */
-    public function beforeRemove(): bool
+    public function beforeRemove()
     {
         $comments = $this->modx->getIterator(TicketComment::class, ['thread' => $this->object->get('id')]);
         /** @var TicketComment $comment */
@@ -33,7 +33,7 @@ class Remove extends RemoveProcessor
     /**
      * Log manager action
      */
-    public function logManagerAction(): void
+    public function logManagerAction()
     {
         $this->modx->logManagerAction($this->objectType . '_remove', $this->classKey,
             $this->object->get($this->primaryKeyField));
@@ -42,7 +42,7 @@ class Remove extends RemoveProcessor
     /**
      * @return bool
      */
-    public function afterRemove(): bool
+    public function afterRemove()
     {
         $this->modx->cacheManager->delete('tickets2/latest.comments');
         $this->modx->cacheManager->delete('tickets2/latest.tickets2');

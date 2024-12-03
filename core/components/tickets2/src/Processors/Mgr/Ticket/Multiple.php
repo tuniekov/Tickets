@@ -10,7 +10,7 @@ class Multiple extends Processor
     /**
      * @return array|string
      */
-    public function process(): array|string
+    public function process()
     {
         if (!$method = $this->getProperty('method', false)) {
             return $this->failure();
@@ -24,8 +24,9 @@ class Multiple extends Processor
         $Tickets2 = $this->modx->getService('Tickets2');
 
         foreach ($ids as $id) {
+            
             /** @var modProcessorResponse $response */
-            $response = $Tickets2->runProcessor('mgr/ticket/' . $method, ['id' => $id]);
+            $response = $Tickets2->runProcessor('Tickets2\\Processors\\Mgr\\Ticket\\' . ucfirst($method), ['id' => $id]);
             if ($response->isError()) {
                 return $response->getResponse();
             }

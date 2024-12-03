@@ -84,7 +84,7 @@ class Update extends ResourceUpdate
     /**
      * @return bool
      */
-    public function setFieldDefault(): bool
+    public function setFieldDefault()
     {
         // Ticket properties
         $properties = $this->modx->context->key == 'mgr'
@@ -133,7 +133,7 @@ class Update extends ResourceUpdate
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $time = time();
         if ($this->_published) {
@@ -170,7 +170,7 @@ class Update extends ResourceUpdate
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $parent = parent::afterSave();
         if ($this->_sendEmails && $this->modx->context->key == 'mgr') {
@@ -183,7 +183,7 @@ class Update extends ResourceUpdate
     /**
      * Call method for notify users about new ticket in section
      */
-    protected function sendTicketMails(): void
+    protected function sendTicketMails()
     {
         /** @var \Tickets2 $Tickets2 */
         if ($Tickets2 = $this->modx->getService('Tickets2')) {
@@ -196,7 +196,7 @@ class Update extends ResourceUpdate
     /**
      * @return mixed|string
      */
-    public function checkFriendlyAlias(): mixed
+    public function checkFriendlyAlias()
     {
         $alias = parent::checkFriendlyAlias();
 
@@ -214,7 +214,7 @@ class Update extends ResourceUpdate
     /**
      * @return int|mixed|null|string
      */
-    public function handleParent(): mixed
+    public function handleParent()
     {
         if ($this->modx->context->key == 'manager') {
             return parent::handleParent();
@@ -245,7 +245,7 @@ class Update extends ResourceUpdate
     /**
      * @return bool
      */
-    public function checkPublishingPermissions(): bool
+    public function checkPublishingPermissions()
     {
         if ($this->modx->context->key == 'mgr') {
             return parent::checkPublishingPermissions();
@@ -257,7 +257,7 @@ class Update extends ResourceUpdate
     /**
      * Clear ticket cache
      */
-    public function clearCache(): void
+    public function clearCache()
     {
         $this->object->clearCache();
         /** @var Tickets2Section $section */
@@ -269,7 +269,7 @@ class Update extends ResourceUpdate
     /**
      * @return array|mixed
      */
-    public function saveTemplateVariables(): array
+    public function saveTemplateVariables()
     {
         if ($this->modx->context->key != 'mgr') {
             $values = [];
@@ -292,7 +292,7 @@ class Update extends ResourceUpdate
     /**
      * @return array
      */
-    public function cleanup(): array
+    public function cleanup()
     {
         $this->processFiles();
 

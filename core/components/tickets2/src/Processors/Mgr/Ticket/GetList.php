@@ -22,7 +22,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         $c->leftJoin(modUser::class, 'CreatedBy');
         $c->leftJoin(modUserProfile::class, 'UserProfile', 'UserProfile.internalKey = Ticket.createdby');
@@ -65,7 +65,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareRow(xPDOObject $object): array
+    public function prepareRow(xPDOObject $object)
     {
         $array = parent::prepareRow($object);
 

@@ -24,7 +24,7 @@ class Create extends ResourceCreate
     /**
      * @return string
      */
-    public function prepareAlias(): string
+    public function prepareAlias()
     {
         if ($this->workingContext->getOption('tickets2.section_id_as_alias')) {
             $alias = 'empty';
@@ -39,7 +39,7 @@ class Create extends ResourceCreate
     /**
      * @return mixed
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         if ($this->object->alias == 'empty') {
             $this->object->set('alias', $this->object->id);
@@ -62,7 +62,7 @@ class Create extends ResourceCreate
     /**
      * Handle boolean properties
      */
-    protected function handleProperties(): void
+    protected function handleProperties()
     {
         $properties = $this->getProperty('properties');
         if (!empty($properties['tickets2'])) {

@@ -10,7 +10,7 @@ class Multiple extends Processor
     /**
      * @return array|string
      */
-    public function process(): array|string
+    public function process()
     {
         if (!$method = $this->getProperty('method', false)) {
             return $this->failure();

@@ -136,7 +136,7 @@ class Ticket extends modResource
                 );
             }
         }
-
+        
         return $value;
     }
 
@@ -563,6 +563,7 @@ class Ticket extends modResource
         $new_parent = $this->isDirty('parent');
         $new_author = $this->isDirty('createdby');
         if ($new_parent || $this->isDirty('alias') || $this->isDirty('published') || ($this->get('uri_override') && !$this->get('uri'))) {
+            $save = parent::save();
             $this->setUri($this->get('alias'));
         }
         $save = parent::save();

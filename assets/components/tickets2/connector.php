@@ -1,5 +1,5 @@
 <?php
-
+use MODX\Revolution\modConnectorRequest;
 /** @var  MODX\Revolution\modX $modx */
 /** @var  Tickets2\Tickets2 $Tickets2 */
 
@@ -18,7 +18,7 @@ $modx->lexicon->load('tickets2:default');
 $path = $modx->getOption(
     'processorsPath',
     $Tickets2->config,
-    $modx->getOption('core_path') . 'components/tickets2/' . 'Processors/'
+    $modx->getOption('core_path') . 'components/tickets2/' . 'src/Processors/'
 );
 $modx->getRequest();
 

@@ -14,7 +14,7 @@ class Unsubscribe extends Processor
     /**
      * @return bool
      */
-    public function checkPermissions(): bool
+    public function checkPermissions()
     {
         return $this->modx->hasPermission($this->permission);
     }
@@ -22,7 +22,7 @@ class Unsubscribe extends Processor
     /**
      * @return bool
      */
-    public function process(): bool
+    public function process()
     {
         $parents = $this->getProperty('parents');
         if ($section = $this->modx->getObject(Tickets2Section::class, $parents, false)) {
@@ -49,7 +49,7 @@ class Unsubscribe extends Processor
      * @param int $k
      * @param int $parents
      */
-    public function logManagerAction(int $k, int $parents): void
+    public function logManagerAction($k, $parents)
     {
         $this->modx->logManagerAction('unsubscribe', $this->classKey, "{$parents} user {$k}");
     }

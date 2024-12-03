@@ -24,7 +24,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         /* Get all comments by section */
         if ($section = (int)$this->getProperty('section')) {
@@ -95,7 +95,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareRow(xPDOObject $object): array
+    public function prepareRow(xPDOObject $object)
     {
         $array = parent::prepareRow($object);
 

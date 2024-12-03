@@ -12,7 +12,7 @@ class UploadComment extends Upload
     /**
      * @return bool|null|string
      */
-    public function initialize(): bool|string|null
+    public function initialize()
     {
         if (!$this->modx->hasPermission($this->permission)) {
             return $this->modx->lexicon('access_denied');

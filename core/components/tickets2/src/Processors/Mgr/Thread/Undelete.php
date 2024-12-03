@@ -17,7 +17,7 @@ class Undelete extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSet(): bool
+    public function beforeSet()
     {
         $this->properties = [];
         return true;
@@ -26,7 +26,7 @@ class Undelete extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $this->object->fromArray([
             'deleted' => 0,
@@ -40,7 +40,7 @@ class Undelete extends UpdateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $this->modx->cacheManager->delete('tickets2/latest.comments');
         $this->modx->cacheManager->delete('tickets2/latest.tickets2');
@@ -51,7 +51,7 @@ class Undelete extends UpdateProcessor
     /**
      * Log manager action
      */
-    public function logManagerAction(): void
+    public function logManagerAction()
     {
         $this->modx->logManagerAction($this->objectType . '_undelete', $this->classKey,
             $this->object->get($this->primaryKeyField));

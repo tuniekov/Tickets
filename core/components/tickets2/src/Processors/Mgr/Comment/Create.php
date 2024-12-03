@@ -19,7 +19,7 @@ class Create extends CreateProcessor
     /**
      * @return bool|string
      */
-    public function initialize(): bool|string
+    public function initialize()
     {
         $this->thread = $this->modx->getObject(TicketThread::class, (int)$this->getProperty('thread'));
         if (!$this->thread) {
@@ -36,7 +36,7 @@ class Create extends CreateProcessor
     /**
      * @return bool|null|string
      */
-    public function beforeSet(): bool|string|null
+    public function beforeSet()
     {
         if (!trim($this->getProperty('text'))) {
             return $this->modx->lexicon('ticket_err_empty');
@@ -62,7 +62,7 @@ class Create extends CreateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $text = $this->getProperty('text');
 
@@ -80,7 +80,7 @@ class Create extends CreateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $this->thread->fromArray([
             'comment_last' => $this->object->get('id'),

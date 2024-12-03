@@ -14,7 +14,7 @@ class Star extends Processor
     /**
      * @return bool|null|string
      */
-    public function initialize(): bool|string|null
+    public function initialize()
     {
         if (!$this->modx->hasPermission($this->permission)) {
             return $this->modx->lexicon('access_denied');
@@ -26,7 +26,7 @@ class Star extends Processor
     /**
      * @return array|string
      */
-    public function process(): array|string
+    public function process()
     {
         $id = (int)$this->getProperty('id');
 

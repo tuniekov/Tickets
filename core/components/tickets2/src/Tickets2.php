@@ -4,35 +4,46 @@ namespace Tickets2;
 
 use MODX\Revolution\modX;
 use MODX\Revolution\modUser;
-use MODX\Revolution\modSnippet;
-use MODX\Revolution\modProcessorResponse;
-
+use MODX\Revolution\pdoTools;
+use PDO;
+/**
+ * Class Tickets2
+ * @package tickets2
+ */
 class Tickets2
 {
     /** @var modX $modx */
-    public modX $modx;
-    /** @var pdoFetch $pdoTools */
+    public $modx;
+    /** @var pdoTools $pdoTools */
     public $pdoTools;
-    public array $initialized = [];
-    public bool $authenticated = false;
-    private ?string $prepareCommentCustom = null;
-    private int $last_view = 0;
-    public array $config = [];
+    public $initialized = [];
+    public $authenticated = false;
+    private $prepareCommentCustom = null;
+    private $last_view = 0;
 
     /**
      * @param modX $modx
      * @param array $config
      */
-    public function __construct(modX &$modx, array $config = [])
+    function __construct(modX &$modx, array $config = [])
     {
         $this->modx =& $modx;
 
-        $corePath = $this->modx->getOption('tickets2.core_path', $config,
-            $this->modx->getOption('core_path') . 'components/tickets2/');
-        $assetsPath = $this->modx->getOption('tickets2.assets_path', $config,
-            $this->modx->getOption('assets_path') . 'components/tickets2/');
-        $assetsUrl = $this->modx->getOption('tickets2.assets_url', $config,
-            $this->modx->getOption('assets_url') . 'components/tickets2/');
+        $corePath = $this->modx->getOption(
+            'tickets2.core_path',
+            $config,
+            $this->modx->getOption('core_path') . 'components/tickets2/'
+        );
+        $assetsPath = $this->modx->getOption(
+            'tickets2.assets_path',
+            $config,
+            $this->modx->getOption('assets_path') . 'components/tickets2/'
+        );
+        $assetsUrl = $this->modx->getOption(
+            'tickets2.assets_url',
+            $config,
+            $this->modx->getOption('assets_url') . 'components/tickets2/'
+        );
         $actionUrl = $this->modx->getOption('tickets2.action_url', $config, $assetsUrl . 'action.php');
         $connectorUrl = $assetsUrl . 'connector.php';
 
@@ -52,7 +63,7 @@ class Tickets2
             'templatesPath' => $corePath . 'elements/templates/',
             'chunkSuffix' => '.chunk.tpl',
             'snippetsPath' => $corePath . 'elements/snippets/',
-            'processorsPath' => $corePath . 'processors/',
+            'processorsPath' => $corePath . 'src/Processors/',
 
             'fastMode' => false,
             'dateFormat' => 'd F Y, H:i',
@@ -79,11 +90,11 @@ class Tickets2
             'requiredFields' => '',
         ], $config);
 
-        // $this->modx->addPackage('Tickets2\Model', $this->config['modelPath']);
+        // $this->modx->addPackage('tickets2', $this->config['modelPath']);
         $this->modx->lexicon->load('tickets2:default');
 
         if ($name = $this->config['snippetPrepareComment']) {
-            if ($snippet = $this->modx->getObject(modSnippet::class, ['name' => $name])) {
+            if ($snippet = $this->modx->getObject('modSnippet', ['name' => $name])) {
                 $this->prepareCommentCustom = $snippet->get('content');
             }
         }
@@ -99,7 +110,7 @@ class Tickets2
      *
      * @return boolean
      */
-    public function initialize(string $ctx = 'web', array $scriptProperties = []): bool
+    public function initialize($ctx = 'web', $scriptProperties = [])
     {
         $this->config = array_merge($this->config, $scriptProperties);
         if (!$this->pdoTools) {
@@ -118,7 +129,6 @@ class Tickets2
                 'tpanel' => (int)$this->authenticated,
                 'enable_editor' => (int)$this->modx->getOption('tickets2.enable_editor'),
             ];
-            
             $this->modx->regClientStartupScript(
                 '<script type="text/javascript">
                     if (typeof Tickets2Config == "undefined") {
@@ -132,7 +142,6 @@ class Tickets2
                 </script>',
                 true
             );
-
             if ($config_js['enable_editor']) {
                 $this->modx->regClientStartupScript(
                     '<script type="text/javascript">
@@ -173,15 +182,15 @@ class Tickets2
     /**
      * Shorthand for the call of processor
      *
+     * @access public
      * @param string $action Path to processor
      * @param array $data Data to be transmitted to the processor
-     *
-     * @return modProcessorResponse|null
+     * @return mixed The result of the processor
      */
-    public function runProcessor(string $action = '', array $data = []): ?modProcessorResponse
+    public function runProcessor($action = '', $data = [])
     {
         if (empty($action)) {
-            return null;
+            return false;
         }
         $this->modx->error->reset();
         $processorsPath = !empty($this->config['processorsPath'])
@@ -195,10 +204,9 @@ class Tickets2
      * Returns sanitized preview of Ticket
      *
      * @param array $data section, pagetitle, text, etc
-     *
-     * @return array|string
+     * @return array
      */
-    public function previewTicket(array $data = [])
+    public function previewTicket($data = [])
     {
         $message = '';
         foreach ($data as $k => $v) {
@@ -222,27 +230,26 @@ class Tickets2
      *
      * @param array $data id, redirect
      * @param bool $restore
-     *
-     * @return array|string
+     * @return array
      */
-    public function deleteTicket(array $data, bool $restore = false)
+    public function deleteTicket($data, $restore = false)
     {
+        $restore = (bool)$restore;
         $id = (int)$data['id'];
         if (empty($data['id'])) {
             return $this->error($this->modx->lexicon('ticket_err_id', ['id' => $id]));
         }
-        
-        $fields = [
-            'class_key' => Model\Ticket::class,
-            'id' => $id
-        ];
+        $fields = [];
+        $fields['class_key'] = 'Ticket';
+        $fields['id'] = $id;
         $processorname = $restore ? 'web/ticket/undelete' : 'web/ticket/delete';
         $response = $this->runProcessor($processorname, $fields);
 
-        /** @var modProcessorResponse $response */
         if ($response->isError()) {
-            $this->modx->log(modX::LOG_LEVEL_INFO,
-                '[Tickets2] Unable to delete Ticket: ' . $response->getMessage());
+            $this->modx->log(
+                modX::LOG_LEVEL_INFO,
+                '[Tickets2] Unable to delete Ticket: ' . $response->getMessage()
+            );
 
             return $this->error($response->getMessage(), $response->getFieldErrors());
         }
@@ -271,10 +278,9 @@ class Tickets2
      * Save ticket through processor and redirect to it
      *
      * @param array $data section, pagetitle, text, etc
-     *
-     * @return array|string
+     * @return array
      */
-    public function saveTicket(array $data = [])
+    public function saveTicket($data = [])
     {
         $requiredFields = array_map('trim', explode(',', $this->config['requiredFields']));
         $requiredFields = array_unique(array_merge($requiredFields, ['parent', 'pagetitle', 'content']));
@@ -283,7 +289,11 @@ class Tickets2
         $bypassFields = array_map('trim', explode(',', $this->config['bypassFields']));
 
         $validate = $this->config['validate'];
-        $modelPath = $this->modx->getOption('formit.core_path', null, $this->modx->getOption('core_path').'components/formit/') .'model/formit/';
+        $modelPath = $this->modx->getOption(
+            'formit.core_path',
+            null,
+            $this->modx->getOption('core_path') . 'components/formit/'
+        ) . 'model/formit/';
         if (!empty($validate) && file_exists($modelPath . 'formit.class.php')) {
             $fi = $this->modx->getService(
                 'formit',
@@ -292,7 +302,7 @@ class Tickets2
                 $this->config
             );
 
-            if ($fi instanceof \FormIt) {
+            if ($fi instanceof FormIt) {
                 $fi->initialize($this->modx->context->get('key'));
                 $fi->loadRequest();
                 
@@ -333,17 +343,13 @@ class Tickets2
         }
 
         $fields['requiredFields'] = $requiredFields;
-        $fields['class_key'] = Model\Ticket::class;
+        $fields['class_key'] = 'Ticket';
         if (!empty($this->config['sections']) && is_array($this->config['sections'])) {
             $fields['sections'] = $this->config['sections'];
         }
-        
         if (!empty($data['tid'])) {
             $fields['id'] = (int)$data['tid'];
-            if ($ticket = $this->modx->getObject(Model\Ticket::class, [
-                'class_key' => Model\Ticket::class,
-                'id' => $fields['id']
-            ])) {
+            if ($ticket = $this->modx->getObject('Ticket', ['class_key' => 'Ticket', 'id' => $fields['id']])) {
                 $fields['context_key'] = $ticket->get('context_key');
                 $fields['alias'] = $ticket->get('alias');
                 $response = $this->modx->runProcessor('resource/update', $fields);
@@ -354,13 +360,14 @@ class Tickets2
             $response = $this->modx->runProcessor('resource/create', $fields);
         }
 
-        /** @var modProcessorResponse $response */
         if ($response->isError()) {
-            $this->modx->log(modX::LOG_LEVEL_INFO,
-                '[Tickets2] Unable to save Ticket: ' . $response->getMessage() . print_r($response->getFieldErrors(), 1));
+            $this->modx->log(
+                modX::LOG_LEVEL_INFO,
+                '[Tickets2] Unable to save Ticket: ' . $response->getMessage() . print_r($response->getFieldErrors(), 1)
+            );
 
             return $this->error($response->getMessage(), $response->getFieldErrors());
-        } elseif ($ticket = $this->modx->getObject(Model\Ticket::class, $response->response['object']['id'])) {
+        } elseif ($ticket = $this->modx->getObject('Ticket', $response->response['object']['id'])) {
             $ticket = $ticket->toArray();
             $this->sendTicketMails($ticket);
         }
@@ -373,7 +380,6 @@ class Tickets2
                 ? html_entity_decode($ticket['content'])
                 : '',
         ];
-
         switch ($data['action']) {
             case 'ticket/save':
                 $message = $this->modx->lexicon('ticket_saved');
@@ -403,9 +409,11 @@ class Tickets2
         }
 
         if ($this->modx->getOption('ms2gallery_sync_tickets2')) {
-            /** @var ms2Gallery $ms2Gallery */
-            $ms2Gallery = $this->modx->getService('ms2gallery', 'ms2Gallery',
-                MODX_CORE_PATH . 'components/ms2gallery/model/ms2gallery/');
+            $ms2Gallery = $this->modx->getService(
+                'ms2gallery',
+                'ms2Gallery',
+                MODX_CORE_PATH . 'components/ms2gallery/model/ms2gallery/'
+            );
             if ($ms2Gallery && method_exists($ms2Gallery, 'syncFiles')) {
                 $ms2Gallery->syncFiles('tickets2', $id, true);
             }
@@ -419,15 +427,13 @@ class Tickets2
      *
      * @param int $id
      * @param int $value
-     *
      * @return array|string
      */
-    public function voteTicket(int $id, int $value = 1)
+    public function voteTicket($id, $value = 1)
     {
         $data = ['id' => $id, 'value' => $value];
-        /** @var modProcessorResponse $response */
         if (!empty($id)) {
-            $response = $this->runProcessor('web/ticket/vote', $data);
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\Ticket\\Vote', $data);
             if ($response->isError()) {
                 return $this->error($response->getMessage());
             }
@@ -457,17 +463,17 @@ class Tickets2
      * Star for ticket
      *
      * @param int $id
-     *
      * @return array|string
      */
-    public function starTicket(int $id)
+    public function starTicket($id)
     {
-        /** @var modProcessorResponse $response */
+        $data = ['id' => $id];
         if (!empty($id)) {
-            $response = $this->runProcessor('web/ticket/star', ['id' => $id]);
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\Ticket\\Star', $data);
             if ($response->isError()) {
                 return $this->error($response->getMessage());
             }
+            
             return $this->success('', $response->getObject());
         }
 
@@ -475,58 +481,171 @@ class Tickets2
     }
 
     /**
-     * Returns sanitized preview of comment
+     * Returns sanitized preview of Comment
      *
-     * @param array $data
-     *
-     * @return array|string
+     * @param array $data section, pagetitle, comment, etc
+     * @return array
      */
-    public function previewComment(array $data = [])
+    public function previewComment($data = [])
     {
-        if (!empty($data['text'])) {
-            $data['text'] = $this->Jevix($data['text'], 'Comment');
-            $data['text'] = $this->pdoTools->fastProcess($data['text']);
-            $preview = $this->getChunk($this->config['tplCommentPreview'], $data);
-            $preview = $this->pdoTools->fastProcess($preview);
+        unset($data['action']);
+
+        // Additional properties
+        $properties = [];
+        $meta = $this->modx->getFieldMeta('TicketComment');
+        foreach ($data as $k => $v) {
+            if (!isset($meta[$k])) {
+                $properties[$k] = $this->modx->stripTags($v);
+            }
         }
-        if (empty($preview)) {
-            $preview = $this->modx->lexicon('ticket_comment_err_no_text');
+        // Create comment
+        $comment = $this->modx->newObject('TicketComment', [
+            'text' => $this->Jevix($data['text'], 'Comment'),
+            'createdon' => date('Y-m-d H:i:s'),
+            'createdby' => $this->modx->user->id,
+            'resource' => $this->config['resource'],
+            'properties' => $properties,
+            'mode' => 'preview',
+        ]);
+        $comment = $comment->toArray();
+
+        /** @var modUser $user */
+        if ($this->authenticated && $user = $this->modx->getObject('modUser', $this->modx->user->id)) {
+            $comment['name'] = $this->modx->user->Profile->fullname;
+            $comment['email'] = $this->modx->user->Profile->email;
+            /** @var modUserProfile $profile */
+            $profile = $this->modx->user->Profile;
+            $comment = array_merge($profile->toArray(), $user->toArray(), $comment);
+        } else {
+            $comment['name'] = !empty($data['name'])
+                ? $data['name']
+                : '';
+            $comment['email'] = !empty($data['email'])
+                ? $data['email']
+                : '';
         }
+        $preview = $this->templateNode($comment, $this->config['tplCommentGuest']);
+        $preview = preg_replace('/\[\[.*?\]\]/', '', $preview);
 
         return $this->success('', ['preview' => $preview]);
     }
 
     /**
-     * Create or update comment
+     * Create or update Comment
      *
-     * @param array $data
-     *
-     * @return array|string
+     * @param array $data section, pagetitle, comment, etc
+     * @return array
      */
-    public function saveComment(array $data = [])
+    public function saveComment($data = [])
     {
-        $data['allowGuest'] = $this->config['allowGuest'];
-        $data['allowGuestEdit'] = $this->config['allowGuestEdit'];
-        $data['allowGuestEmails'] = $this->config['allowGuestEmails'];
+        $validate = $this->config['validate'];
+        $modelPath = $this->modx->getOption(
+            'formit.core_path',
+            null,
+            $this->modx->getOption('core_path') . 'components/formit/'
+        ) . 'model/formit/';
+        if (!empty($validate) && file_exists($modelPath . 'formit.class.php')) {
+            $fi = $this->modx->getService(
+                'formit',
+                'FormIt',
+                $modelPath,
+                $this->config
+            );
 
-        /** @var modProcessorResponse $response */
-        if (!empty($data['id'])) {
-            $response = $this->runProcessor('web/comment/update', $data);
+            if ($fi instanceof FormIt) {
+                $fi->initialize($this->modx->context->get('key'));
+                $fi->loadRequest();
+                
+                $fields = $fi->request->prepare();
+                $fi->request->handle($fields);
+
+                $errors = $fi->request->validator->getRawErrors();
+                if (!empty($errors)) {
+                    $data = [];
+                    foreach ($errors as $field => $message) {
+                        $data[$field] = ['field' => $field, 'message' => $message];
+                    }
+                    return $this->error('', $data);
+                }
+            }
+        }
+        unset($data['action']);
+        $data['raw'] = trim($data['text']);
+        $data['text'] = $this->Jevix($data['text'], 'Comment');
+        $data['allowGuest'] = !empty($this->config['allowGuest']);
+        $data['allowGuestEdit'] = !empty($this->config['allowGuestEdit']);
+        $data['requiredFields'] = $this->config['requiredFields'];
+        $data['published'] = (!$this->authenticated && empty($this->config['autoPublishGuest'])) || 
+                            ($this->authenticated && empty($this->config['autoPublish']))
+            ? false
+            : true;
+
+        if ($this->authenticated) {
+            if (empty($data['name'])) {
+                $data['name'] = $this->modx->user->Profile->get('fullname');
+            }
+            $data['email'] = $this->modx->user->Profile->get('email');
         } else {
-            $response = $this->runProcessor('web/comment/create', $data);
+            if (!empty($this->config['enableCaptcha'])) {
+                if ($data['captcha'] != $_SESSION['TicketComments']['captcha']) {
+                    $captcha = $this->modx->lexicon('ticket_comment_captcha', $this->getCaptcha());
+                    return $this->error($this->modx->lexicon('ticket_comment_err_captcha'), ['captcha' => $captcha]);
+                }
+            }
+            $data['name'] = !empty($data['name'])
+                ? $data['name']
+                : '';
+            $data['email'] = !empty($data['email'])
+                ? $data['email']
+                : '';
+        }
+        unset($data['rating'], $data['rating_plus'], $data['rating_minus']);
+
+        if (!empty($data['id'])) {
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\Comment\\Update', $data);
+        } else {
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\Comment\\Create', $data);
         }
 
         if ($response->isError()) {
+            $this->modx->log(
+                modX::LOG_LEVEL_INFO,
+                '[Tickets2] Unable to save Comment: ' . $response->getMessage() . print_r($response->getFieldErrors(), 1)
+            );
             return $this->error($response->getMessage(), $response->getFieldErrors());
         }
 
         $comment = $response->getObject();
-        $comment['new'] = empty($data['id']);
-        if (!empty($comment['name']) || !empty($comment['email'])) {
-            $this->setCustomFields($comment);
+        $comment['mode'] = 'save';
+        $comment['new_parent'] = $data['parent'];
+        $comment['resource'] = $this->config['resource'];
+        $comment['vote'] = $comment['star'] = '';
+
+        /** @var modUser $user */
+        if ($user = $this->modx->getObject('modUser', $comment['createdby'])) {
+            /** @var modUserProfile $profile */
+            $profile = $user->getOne('Profile');
+            $comment = array_merge($profile->toArray(), $user->toArray(), $comment);
         }
 
-        return $this->success('', $comment);
+        if (empty($data['id'])) {
+            $this->sendCommentMails($comment);
+        }
+
+        $data = [];
+        $data['captcha'] = empty($comment['createdby']) && !empty($this->config['enableCaptcha'])
+            ? $this->modx->lexicon('ticket_comment_captcha', $this->getCaptcha())
+            : '';
+
+        if ($comment['published']) {
+            $this->modx->cacheManager->delete('tickets2/latest.comments');
+            $this->modx->cacheManager->delete('tickets2/latest.tickets');
+            $comment = $this->templateNode($comment, $this->config['tplCommentAuth']);
+            $data['comment'] = preg_replace('/\[\[.*?\]\]/', '', $comment);
+            return $this->success('', $data);
+        } else {
+            return $this->success($this->modx->lexicon('ticket_unpublished_comment'), $data);
+        }
     }
 
     /**
@@ -534,30 +653,35 @@ class Tickets2
      *
      * @param int $id
      * @param int $value
-     *
      * @return array|string
      */
-    public function voteComment(int $id, int $value = 1)
+    public function voteComment($id, $value = 1)
     {
         $data = ['id' => $id, 'value' => $value];
+
         /** @var modProcessorResponse $response */
-        if (!empty($id)) {
-            $response = $this->runProcessor('web/comment/vote', $data);
+        if (!empty($id) && !empty($value)) {
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\Comment\\Vote', $data);
             if ($response->isError()) {
                 return $this->error($response->getMessage());
-            }
-            
-            $data = $response->getObject();
-            if ($data['rating'] > 0) {
-                $data['rating'] = '+' . $data['rating'];
-                $data['status'] = 1;
-            } elseif ($data['rating'] < 0) {
-                $data['status'] = -1;
             } else {
-                $data['status'] = 0;
-            }
+                $data = $response->getObject();
+                $rating = abs($data['rating_plus']) + abs($data['rating_minus']);
+                $data['title'] = $this->modx->lexicon('ticket_rating_total')
+                    . " {$rating}: ↑{$data['rating_plus']} "
+                    . $this->modx->lexicon('ticket_rating_and')
+                    . " ↓{$data['rating_minus']}";
+                if ($data['rating'] > 0) {
+                    $data['rating'] = '+' . $data['rating'];
+                    $data['status'] = 1;
+                } elseif ($data['rating'] < 0) {
+                    $data['status'] = -1;
+                } else {
+                    $data['status'] = 0;
+                }
 
-            return $this->success('', $data);
+                return $this->success('', $data);
+            }
         }
 
         return $this->error('tickets2_err_unknown');
@@ -567,162 +691,762 @@ class Tickets2
      * Star for comment
      *
      * @param int $id
-     *
      * @return array|string
      */
-    public function starComment(int $id)
+    public function starComment($id)
     {
+        $data = ['id' => $id];
         /** @var modProcessorResponse $response */
         if (!empty($id)) {
-            $response = $this->runProcessor('web/comment/star', ['id' => $id]);
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\Comment\\Star', $data);
             if ($response->isError()) {
                 return $this->error($response->getMessage());
+            } else {
+                $data = $response->getObject();
+                return $this->success('', $data);
             }
-            return $this->success('', $response->getObject());
         }
 
         return $this->error('tickets2_err_unknown');
     }
 
     /**
-     * Returns sanitized preview of comment
+     * Returns Comment for edit by its author
      *
-     * @param array $data
-     *
-     * @return array|string
+     * @param int $id Id of a comment
+     * @return array
      */
-    public function previewEmail(array $data = [])
+    public function getComment($id)
     {
-        if (!empty($data['text'])) {
-            $data['text'] = nl2br($data['text']);
-        }
-        if (empty($data['text'])) {
-            $data['text'] = $this->modx->lexicon('ticket_comment_err_no_text');
+        $response = $this->runProcessor('Tickets2\\Processors\\Web\\Comment\\Get', ['id' => $id]);
+        if ($response->isError()) {
+            return $this->error($response->getMessage());
         }
 
-        $preview = $this->getChunk($this->config['tplCommentEmailPreview'], $data);
-        $preview = $this->pdoTools->fastProcess($preview);
+        $comment = $response->getObject();
+        $time = time() - strtotime($comment['createdon']);
+        $time_limit = $this->config['commentEditTime'];
 
-        return $this->success('', ['preview' => $preview]);
+        if ($this->authenticated && $this->modx->user->id != $comment['createdby']) {
+            return $this->error($this->modx->lexicon('ticket_comment_err_wrong_user'));
+        } elseif (!$this->authenticated) {
+            if (!$this->config['allowGuest'] || !$this->config['allowGuestEdit']) {
+                return $this->error($this->modx->lexicon('ticket_comment_err_guest_edit'));
+            } elseif (!isset($_SESSION['TicketComments']['ids'][$id])) {
+                return $this->error($this->modx->lexicon('ticket_comment_err_wrong_user'));
+            }
+        } elseif ($this->modx->getCount('TicketComment', ['parent' => $comment['id']])) {
+            return $this->error($this->modx->lexicon('ticket_comment_err_has_replies'));
+        } elseif ($time >= $time_limit) {
+            return $this->error($this->modx->lexicon('ticket_comment_err_no_time'));
+        }
+
+        $data = [
+            'raw' => $comment['raw'],
+            'time' => $time_limit - $time,
+            'files' => $this->getFileComment($id),
+        ];
+        if (empty($comment['createdby'])) {
+            $data['name'] = $comment['name'];
+            $data['email'] = $comment['email'];
+        }
+
+        return $this->success('', $data);
+    }
+
+    /**
+     * Returns TicketFile for TicketComment current author
+     *
+     * @param int $tid
+     * @return string
+     */
+    public function getFileComment($tid = 0)
+    {
+        if (empty($this->config['allowFiles'])) {
+            return '';
+        }
+        $q = $this->modx->newQuery('TicketFile');
+        $q->where(['class' => 'TicketComment']);
+        if (!empty($tid)) {
+            $q->andCondition(['parent' => $tid, 'createdby' => $this->modx->user->id], null, 1);
+        } else {
+            $q->andCondition(['parent' => 0, 'createdby' => $this->modx->user->id], null, 1);
+        }
+        $q->sortby('rank', 'ASC');
+        $q->sortby('createdon', 'ASC');
+        $collection = $this->modx->getIterator('TicketFile', $q);
+        $files = '';
+        /** @var TicketFile $item */
+        foreach ($collection as $item) {
+            if ($item->get('deleted') && !$item->get('parent')) {
+                $item->remove();
+            } else {
+                $item = $item->toArray();
+                $item['size'] = round($item['size'] / 1024, 2);
+                $item['new'] = empty($item['parent']);
+                $tpl = $item['type'] == 'image'
+                    ? $this->config['tplImage']
+                    : $this->config['tplFile'];
+                $files .= $this->getChunk($tpl, $item);
+            }
+        }
+
+        $chunk = $this->getChunk($this->config['tplFiles'], ['files' => $files]);
+
+        return $chunk;
+    }
+
+    /**
+     * Return unseen comments of thread for user
+     *
+     * @param string $name
+     * @param bool $log
+     * @return array
+     */
+    public function getNewComments($name, $log = true)
+    {
+        if (!$this->authenticated) {
+            return $this->error($this->modx->lexicon('access_denied'));
+        } elseif ($thread = $this->modx->getObject('TicketThread', ['name' => $name])) {
+            if ($this->authenticated && $view = $this->modx->getObject('TicketView',
+                    ['uid' => $this->modx->user->id, 'parent' => $thread->get('resource')])
+            ) {
+                $date = $view->get('timestamp');
+                $q = $this->modx->newQuery('TicketComment');
+                $q->leftJoin('MODX\\Revolution\\modUser', 'User', '`User`.`id` = `TicketComment`.`createdby`');
+                $q->leftJoin('MODX\\Revolution\\modUserProfile', 'Profile', '`Profile`.`internalKey` = `TicketComment`.`createdby`');
+                $q->where([
+                    '`TicketComment`.`published`' => 1,
+                    '`TicketComment`.`thread`' => $thread->id,
+                    '`TicketComment`.`createdby`:!=' => $this->modx->user->id,
+                ]);
+                $q->andCondition([
+                    '`TicketComment`.`createdon`:>' => $date,
+                    'OR:`TicketComment`.`editedon`:>' => $date,
+                ]);
+
+                $q->sortby('`TicketComment`.`id`', 'ASC');
+                $q->select($this->modx->getSelectColumns('TicketComment', 'TicketComment'));
+                $q->select($this->modx->getSelectColumns('MODX\\Revolution\\modUser', 'User', '', ['username']));
+                $q->select($this->modx->getSelectColumns('MODX\\Revolution\\modUserProfile', 'Profile', '', ['id'], true));
+
+                $comments = [];
+                if ($q->prepare() && $q->stmt->execute()) {
+                    $comments = $q->stmt->fetchAll(PDO::FETCH_ASSOC);
+                }
+
+                    if ($log === true) {
+                        $this->logView($thread->resource);
+                    }
+
+                return $this->success('', ['comments' => $comments]);
+            }
+        }
+
+        return $this->error('tickets2_err_unknown');
     }
 
     /**
      * Sanitize any text through Jevix snippet
      *
      * @param string $text Text for sanitization
-     * @param string $type Type of sanitization
-     *
-     * @return string
+     * @param string $setName Name of property set for get parameters from
+     * @return mixed $processed Sanitized text
      */
-    public function Jevix(string $text, string $type = 'Ticket'): string
+    public function Jevix($text = null, $setName = '')
     {
-        if ($snippet = $this->modx->getObject(modSnippet::class, ['name' => 'Jevix'])) {
-            $params = [];
-            if ($snippet_params = $snippet->getProperties()) {
-                $params = $snippet_params[$type] ?? $snippet_params['Ticket'];
-            }
-            $text = $snippet->process(['input' => $text] + $params);
+        if (empty($text)) {
+            return ' ';
         }
 
-        return $text;
+        $snippet = $this->modx->getObject('modSnippet', ['name' => 'Jevix']);
+        if (!$snippet) {
+            return 'Could not load snippet Jevix';
+        }
+        // Loading parser if needed - it is for mgr context
+        // if (!is_object($this->modx->parser)) {
+        //     $this->modx->getParser();
+        // }
+
+        $params = [];
+        if (!empty($setName)) {
+            
+            $properties = $snippet->getProperties();
+            if (isset($properties[$setName])) {
+                $params = $properties[$setName];
+            }
+        }
+
+        $text = html_entity_decode($text, ENT_COMPAT, 'UTF-8');
+        $params['input'] = str_replace(
+            array('[', ']', '{', '}'),
+            array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+            $text
+        );
+
+        $snippet->setCacheable(false);
+        $filtered = $snippet->process($params);
+
+        if ($replaceTags) {
+            $filtered = str_replace(
+                array('*(*(*(*(*(*', '*)*)*)*)*)*', '`', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+                array('&#91;', '&#93;', '&#96;', '&#123;', '&#125;'),
+                $filtered
+            );
+        } else {
+            $filtered = str_replace(
+                array('*(*(*(*(*(*', '*)*)*)*)*)*', '~(~(~(~(~(~', '~)~)~)~)~)~'),
+                array('[', ']', '{', '}'),
+                $filtered
+            );
+        }
+
+        return $filtered;
     }
 
     /**
      * Sanitize MODX tags
      *
-     * @param string $text Text for sanitization
-     *
-     * @return string
+     * @param string $string Any string with MODX tags
+     * @return string String with html entities
      */
-    public function sanitizeString(string $text): string
+    public function sanitizeString($string = '')
     {
-        $text = strip_tags($text);
-        $text = str_replace([
-            '[',
-            ']',
-            '`',
-            '{',
-            '}'
-        ], [
-            '&#91;',
-            '&#93;',
-            '&#96;',
-            '&#123;',
-            '&#125;',
-        ], $text);
+        if (is_array($string)) {
+            foreach ($string as $key => $value) {
+                $string[$key] = $this->sanitizeString($value);
+            }
 
-        return $text;
+            return $string;
+        }
+
+        $string = htmlentities(trim($string), ENT_QUOTES, "UTF-8");
+        $string = preg_replace('/^@.*\b/', '', $string);
+        $string = str_replace(
+            array('[', ']', '`', '{', '}'),
+            array('&#91;', '&#93;', '&#96;', '&#123;', '&#125;'),
+            $string
+        );
+
+        return $string;
     }
 
     /**
-     * Process template with values
+     * Recursive template of the comment node
      *
-     * @param string $name Name of template
-     * @param array $values Values for processing
+     * @param array $node
+     * @param null $tpl
      *
      * @return string
      */
-    public function getChunk(string $name, array $values = []): string
+    public function templateNode($node = [], $tpl = null)
+    {
+        $children = null;
+        if (!empty($node['children'])) {
+            foreach ($node['children'] as $v) {
+                $children .= $this->templateNode($v, $tpl);
+            }
+        }
+        $node['has_parent'] = !empty($node['parent']);
+        // Handle rating
+        if (isset($node['ratings']['days_comment_vote'])) {
+            if ($node['ratings']['days_comment_vote'] !== '') {
+                $max = strtotime($node['createdon']) + ((float)$node['ratings']['days_comment_vote'] * 86400);
+                if (time() > $max) {
+                    $node['cant_vote'] = 1;
+                }
+            }
+        }
+        if (!isset($node['cant_vote'])) {
+            if (!$this->authenticated || $this->modx->user->id == $node['createdby']) {
+                $node['cant_vote'] = 1;
+            } elseif (array_key_exists('vote', $node)) {
+                if (empty($node['vote'])) {
+                    $node['can_vote'] = 1;
+                } elseif ($node['vote'] > 0) {
+                    $node['voted_plus'] = 1;
+                    $node['cant_vote'] = 1;
+                } elseif ($node['vote'] < 0) {
+                    $node['voted_minus'] = 1;
+                    $node['cant_vote'] = 1;
+                }
+            }
+        }
+        if ($node['rating'] > 0) {
+            $node['rating'] = '+' . $node['rating'];
+            $node['rating_positive'] = 1;
+            $node['bad'] = '';
+        } elseif ($node['rating'] < 0) {
+            $node['rating_negative'] = 1;
+            $node['bad'] = $node['rating'] >= -5
+                ? ' bad bad' . abs($node['rating'])
+                : ' bad bad5';
+        } else {
+            $node['bad'] = '';
+        }
+        $node['rating_total'] = abs($node['rating_plus']) + abs($node['rating_minus']);
+
+        // Handle stars
+        if ($this->authenticated && array_key_exists('star', $node)) {
+            $node['can_star'] = 1;
+            $node['stared'] = !empty($node['star']);
+            $node['unstared'] = empty($node['star']);
+        }
+
+        // Check comment novelty
+        if (isset($node['resource']) && $this->last_view === 0) {
+            if ($this->authenticated && $view = $this->modx->getObject('TicketView',
+                    array('parent' => $node['resource'], 'uid' => $this->modx->user->id))
+            ) {
+                $this->last_view = strtotime($view->get('timestamp'));
+            } else {
+                $this->last_view = -1;
+            }
+        }
+
+        // Processing comment and selecting needed template
+        $node = $this->prepareComment($node);
+        if (empty($tpl)) {
+            $tpl = $this->authenticated || !empty($this->config['allowGuest'])
+                ? $this->config['tplCommentAuth']
+                : $this->config['tplCommentGuest'];
+        }
+        if ($node['deleted']) {
+            $tpl = $this->config['tplCommentDeleted'];
+        }
+        // Special processing for guests
+        if (!empty($node['user_email'])) {
+            $node['email'] = $node['user_email'];
+        }
+        unset($node['user_email']);
+        if (empty($node['fullname']) && !empty($node['name'])) {
+            $node['fullname'] = $node['name'];
+        }
+        $node['guest'] = empty($node['createdby']);
+        // --
+
+        if (!empty($children) || !empty($node['has_children'])) {
+            $node['children'] = $children;
+            $node['comment_edit_link'] = false;
+        } elseif ((time() - strtotime($node['createdon']) <= $this->config['commentEditTime'])) {
+            if ($this->modx->user->id && $node['createdby'] == $this->modx->user->id) {
+                $node['comment_edit_link'] = true;
+            } elseif ($this->config['allowGuest'] && $this->config['allowGuestEdit']) {
+                if (isset($_SESSION['TicketComments']['ids'][$node['id']])) {
+                    $node['comment_edit_link'] = true;
+                }
+            }
+            $node['children'] = '';
+        } else {
+            $node['children'] = '';
+        }
+        $node['comment_was_edited'] = (bool)$node['editedon'];
+        $node['comment_new'] = $this->authenticated && $node['createdby'] != $this->modx->user->id && $this->last_view > 0 && strtotime($node['createdon']) > $this->last_view;
+
+        return $this->getChunk($tpl, $node, $this->config['fastMode']);
+    }
+
+    /**
+     * Render of the comment
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    public function prepareComment($data = array())
+    {
+        if (!empty($this->prepareCommentCustom)) {
+            return eval($this->prepareCommentCustom);
+        } else {
+            $data['gravatar'] = $this->config['gravatarUrl'] . md5(strtolower($data['email'])) . '?s=' . $this->config['gravatarSize'] . '&d=' . $this->config['gravatarIcon'];
+            $data['avatar'] = !empty($data['photo'])
+                ? $data['photo']
+                : $data['gravatar'];
+            if (!empty($data['resource'])) {
+                $data['url'] = $this->modx->makeUrl($data['resource'], '', '', 'full');
+            }
+            $data['date_ago'] = $this->dateFormat($data['createdon']);
+
+            return $data;
+        }
+    }
+
+    /**
+     * Method for transform array to placeholders
+     *
+     * @var array $array With keys and values
+     * @var string $prefix Prefix for array keys
+     *
+     * @return array $array Two nested arrays with placeholders and values
+     */
+    public function makePlaceholders(array $array = array(), $prefix = '')
     {
         if (!$this->pdoTools) {
             $this->loadPdoTools();
         }
 
-        return $this->pdoTools->getChunk($name, $values);
+        return $this->pdoTools->makePlaceholders($array, $prefix);
     }
 
     /**
-     * Email notifications about new ticket
+     * Email notifications about new comment
      *
      * @param array $ticket
+     * @param bool $force
+     *
+     * @return void
      */
-    public function sendTicketMails(array $ticket): void
+    public function sendTicketMails($ticket = array(), $force = false)
     {
+        // We need only the first publication of ticket
+        if (!$force) {
+            if (empty($ticket['published']) || $ticket['createdon'] != $ticket['publishedon']) {
+                return;
+            } elseif (($ticket['editedon'] != 0 && $ticket['editedon'] != $ticket['createdon'])) {
+                return;
+            }
+        }
+
         /** @var Tickets2Section $section */
-        if (!$section = $this->modx->getObject(Model\Tickets2Section::class, $ticket['parent'])) {
-            return;
+        if ($section = $this->modx->getObject('Tickets2Section', $ticket['parent'], false)) {
+            $properties = $section->get('properties');
+            $subscribers = !empty($properties['subscribers'])
+                ? $properties['subscribers']
+                : array();
+            $ticket = array_merge($ticket, $section->toArray('section.'));
+        }
+        /** @var modUser $user */
+        if ($user = $this->modx->getObject('modUser', $ticket['createdby'])) {
+            if ($profile = $user->getOne('Profile')) {
+                $ticket = array_merge($ticket, array_merge($profile->toArray('user.'), $user->toArray('user.')));
+            }
         }
 
-        $properties = $section->getProperties();
-        $subscribers = !empty($properties['subscribers'])
-            ? $properties['subscribers']
-            : [];
-
-        $owner_id = $ticket['createdby'];
-        if (empty($subscribers) || !is_array($subscribers)) {
-            return;
-        } elseif (($key = array_search($owner_id, $subscribers)) !== false) {
-            unset($subscribers[$key]);
+        // Send notifications to admin
+        $sent = array();
+        if ($this->modx->getOption('tickets2.mail_bcc_level') >= 1) {
+            if ($bcc = $this->modx->getOption('tickets2.mail_bcc')) {
+                $bcc = array_map('trim', explode(',', $bcc));
+                if (!empty($bcc)) {
+                    foreach ($bcc as $uid) {
+                        if ($uid == $ticket['createdby']) {
+                            continue;
+                        }
+                        $this->addQueue(
+                            $uid,
+                            $this->modx->lexicon('ticket_email_bcc', $ticket),
+                            $this->getChunk($this->config['tplTicketEmailBcc'], $ticket, false)
+                        );
+                        $sent[] = $uid;
+                    }
+                }
+            }
         }
 
+        // Send email to subscribers current author
+        if ($author = $this->modx->getObject('TicketAuthor', array('id' => $ticket['createdby']))) {
+            $properties = $author->get('properties');
+            if (!empty($properties['subscribers'])) {
+                foreach ($properties['subscribers'] as $uid) {
+                    if (in_array($uid, $sent) || $ticket['createdby'] == $uid) {
+                        continue;
+                    } else {
+                        $this->addQueue(
+                            $uid,
+                            $this->modx->lexicon('tickets2_author_email_subscription', $ticket),
+                            $this->getChunk($this->config['tplAuthorEmailSubscription']?$this->config['tplAuthorEmailSubscription']:'tpl.Tickets2.author.email.subscription', $ticket, false)
+                        );
+                        $sent[] = $uid;
+                    }
+                }
+            }
+        }
+
+        // Then we send emails to subscribers
         if (!empty($subscribers)) {
-            $users = $this->modx->getIterator(modUser::class, ['id:IN' => $subscribers, 'active' => 1]);
-
-            /** @var modUser $user */
-            foreach ($users as $user) {
-                /** @var modUserProfile $profile */
-                $profile = $user->getOne('Profile');
-                if ($profile->get('email')) {
-                    $this->modx->log(modX::LOG_LEVEL_INFO, "Sending email to {$profile->get('email')}");
-                    $this->modx->runProcessor('web/ticket/email', [
-                        'ticket' => $ticket['id'],
-                        'email' => $profile->get('email'),
-                    ]);
+            foreach ($subscribers as $uid) {
+                if (in_array($uid, $sent) || $ticket['createdby'] == $uid) {
+                    continue;
+                } else {
+                    $this->addQueue(
+                        $uid,
+                        $this->modx->lexicon('tickets2_section_email_subscription', $ticket),
+                        $this->getChunk($this->config['tplTicketEmailSubscription'], $ticket, false)
+                    );
                 }
             }
         }
     }
 
     /**
+     * Email notifications about new comment
+     *
+     * @param array $comment
+     *
+     * @return void
+     */
+    public function sendCommentMails($comment = array())
+    {
+        $owner_uid = $reply_uid = $reply_email = null;
+        $subscribers = array();
+        $q = $this->modx->newQuery('TicketThread');
+        $q->leftJoin('modResource', 'modResource', 'TicketThread.resource = modResource.id');
+        $q->select('modResource.createdby as uid, modResource.id as resource, modResource.pagetitle, TicketThread.subscribers');
+        $q->where(array('TicketThread.id' => $comment['thread']));
+        if ($q->prepare() && $q->stmt->execute()) {
+            $res = $q->stmt->fetch(PDO::FETCH_ASSOC);
+            if (!empty($res)) {
+                $comment = array_merge($comment, array(
+                    'resource' => $res['resource'],
+                    'pagetitle' => $res['pagetitle'],
+                    'author' => $res['uid'],
+                ));
+                $owner_uid = $res['uid'];
+                $subscribers = json_decode($res['subscribers'], true);
+            }
+        }
+
+        $comment = $this->prepareComment($comment);
+        $sent = array();
+
+        // It is a reply for a comment
+        if ($comment['parent']) {
+            $q = $this->modx->newQuery('TicketComment');
+            $q->select('TicketComment.createdby as uid, TicketComment.text, TicketComment.email');
+            $q->where(array('TicketComment.id' => $comment['parent']));
+            if ($q->prepare() && $q->stmt->execute()) {
+                if ($res = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $reply_uid = $res['uid'];
+                    $reply_email = $res['email'];
+                    $comment['parent_text'] = $res['text'];
+                }
+            }
+        }
+
+        $published = !empty($comment['published']) && !array_key_exists('was_published', $comment['properties']);
+        $comment['manager_url'] = trim($this->modx->getOption('site_url'),
+                '/') . MODX_MANAGER_URL . '?a=home&namespace=tickets2';
+
+        if ($published) {
+            // We always send replies for comments
+            if (($reply_uid && $reply_uid != $comment['createdby']) || ($reply_email && $reply_email != $comment['email'])) {
+                $this->addQueue(
+                    $reply_uid,
+                    $this->modx->lexicon('ticket_comment_email_reply', $comment),
+                    $this->getChunk($this->config['tplCommentEmailReply'], $comment, false),
+                    $reply_email
+                );
+                $sent[] = $reply_uid;
+            }
+        }
+
+        // Then we make blind copy to administrators
+        if ($this->modx->getOption('tickets2.mail_bcc_level') >= 2 || !$published) {
+            if ($bcc = $this->modx->getOption('tickets2.mail_bcc')) {
+                $bcc = array_map('trim', explode(',', $bcc));
+                foreach ($bcc as $uid) {
+                    if ($published && (in_array($uid, $sent) || $uid == $owner_uid || $uid == $comment['createdby'])) {
+                        continue;
+                    }
+                    $this->addQueue(
+                        $uid,
+                        !$published
+                            ? $this->modx->lexicon('ticket_comment_email_unpublished_bcc', $comment)
+                            : $this->modx->lexicon('ticket_comment_email_bcc', $comment),
+                        !$published
+                            ? $this->getChunk($this->config['tplCommentEmailUnpublished'], $comment, false)
+                            : $this->getChunk($this->config['tplCommentEmailBcc'], $comment, false)
+                    );
+                    $sent[] = $uid;
+                }
+            }
+        }
+
+        if ($published) {
+            if (!empty($subscribers)) {
+                // And send emails to subscribers
+                foreach ($subscribers as $uid) {
+                    if (in_array($uid, $sent) || $uid == $comment['createdby']) {
+                        continue;
+                    } elseif ($uid == $owner_uid) {
+                        $this->addQueue(
+                            $uid,
+                            $this->modx->lexicon('ticket_comment_email_owner', $comment),
+                            $this->getChunk($this->config['tplCommentEmailOwner'], $comment, false)
+                        );
+                    } else {
+                        $this->addQueue(
+                            $uid,
+                            $this->modx->lexicon('ticket_comment_email_subscription', $comment),
+                            $this->getChunk($this->config['tplCommentEmailSubscription'], $comment, false)
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds emails to queue
+     *
+     * @param $uid
+     * @param $subject
+     * @param $body
+     * @param $email
+     *
+     * @return bool|string
+     */
+    public function addQueue($uid, $subject, $body, $email = '')
+    {
+        $uid = (int)$uid;
+        $email = trim($email);
+
+        if (empty($uid) && (empty($this->config['allowGuestEmails']) || empty($email))) {
+            return false;
+        }
+
+        /** @var TicketQueue $queue */
+        $queue = $this->modx->newObject('TicketQueue', array(
+                'uid' => $uid,
+                'subject' => $subject,
+                'body' => $body,
+                'email' => $email,
+            )
+        );
+
+        return $this->modx->getOption('tickets2.mail_queue', null, false, true)
+            ? $queue->save()
+            : $queue->Send();
+    }
+
+    /** @deprecated
+     * @param $name
+     *
+     * @return array
+     */
+    public function subscribe($name)
+    {
+        return $this->subscribeThread($name);
+    }
+
+    /**
+     * This method subscribe or unsubscribe users for notifications about new comments in thread.
+     *
+     * @param string $name Name of tickets2 thread for subscribe or unsubscribe
+     *
+     * @return array
+     */
+    public function subscribeThread($name)
+    {
+        if (!$this->authenticated) {
+            return $this->error('ticket_err_access_denied');
+        }
+        /** @var TicketThread $thread */
+        if ($thread = $this->modx->getObject('TicketThread', array('name' => $name))) {
+            $message = $thread->Subscribe()
+                ? 'ticket_thread_subscribed'
+                : 'ticket_thread_unsubscribed';
+
+            return $this->success($this->modx->lexicon($message));
+        } else {
+            return $this->error($this->modx->lexicon('ticket_err_wrong_thread'));
+        }
+    }
+
+    /**
+     * This method subscribe or unsubscribe users for notifications about new tickets2 in section.
+     *
+     * @param $id
+     *
+     * @return array
+     */
+    public function subscribeSection($id)
+    {
+        if (!$this->authenticated) {
+            return $this->error('ticket_err_access_denied');
+        }
+        /** @var Tickets2Section $section */
+        if ($section = $this->modx->getObject('Tickets2Section', array('id' => $id, 'class_key' => 'Tickets2Section'))) {
+            $message = $section->Subscribe()
+                ? 'tickets2_section_subscribed'
+                : 'tickets2_section_unsubscribed';
+
+            return $this->success($this->modx->lexicon($message));
+        } else {
+            return $this->error($this->modx->lexicon('ticket_err_wrong_section'));
+        }
+    }
+
+    /**
+     * This method subscribe or unsubscribe users for notifications about new tickets2 specified author.
+     *
+     * @param $id
+     *
+     * @return array
+     */
+    public function subscribeAuthor($id)
+    {
+        if (!$this->authenticated) {
+            return $this->error('ticket_err_access_denied');
+        }
+        /** @var Tickets2Section $section */
+        if ($profile = $this->modx->getObject('TicketAuthor', array('id' => $id))) {
+            $message = $profile->Subscribe()
+                ? 'tickets2_author_subscribed'
+                : 'tickets2_author_unsubscribed';
+
+            return $this->success($this->modx->lexicon($message));
+        } else {
+            return $this->error($this->modx->lexicon('ticket_err_wrong_author'));
+        }
+    }
+
+    /**
+     * Loads an instance of pdoTools
+     *
+     * @return boolean
+     */
+    public function loadPdoTools()
+    {
+        if (!is_object($this->pdoTools) || !($this->pdoTools instanceof pdoTools)) {
+            $this->pdoTools = $this->modx->getService('pdoFetch');
+            $this->pdoTools->setConfig($this->config);
+        }
+
+        return !empty($this->pdoTools) && $this->pdoTools instanceof pdoTools;
+    }
+
+    /**
+     * Process and return the output from a Chunk by name.
+     *
+     * @param string $name The name of the chunk.
+     * @param array $properties An associative array of properties to process the Chunk with, treated as placeholders within the scope of the Element.
+     * @param boolean $fastMode If false, all MODX tags in chunk will be processed.
+     *
+     * @return string The processed output of the Chunk.
+     */
+    public function getChunk($name, array $properties = array(), $fastMode = false)
+    {
+        if (!$this->modx->parser) {
+            $this->modx->getParser();
+        }
+        if (!$this->pdoTools) {
+            $this->loadPdoTools();
+        }
+
+        return $this->pdoTools->getChunk($name, $properties, $fastMode);
+    }
+
+    /**
      * Formats date to "10 minutes ago" or "Yesterday in 22:10"
      * This algorithm taken from https://github.com/livestreet/livestreet/blob/7a6039b21c326acf03c956772325e1398801c5fe/engine/modules/viewer/plugs/function.date_format.php
      *
-     * @param string|int $date Timestamp to format
-     * @param string|null $dateFormat
+     * @param string $date Timestamp to format
+     * @param string $dateFormat
      *
      * @return string
      */
-    public function dateFormat($date, ?string $dateFormat = null): string
+    public function dateFormat($date, $dateFormat = null)
     {
         $date = preg_match('/^\d+$/', $date)
             ? $date
@@ -744,9 +1468,10 @@ class Tickets2
             if ($minutes < $this->config['dateMinutes']) {
                 if ($minutes > 0) {
                     return $this->declension($minutes,
-                        $this->modx->lexicon('ticket_date_minutes_back', ['minutes' => $minutes]));
+                        $this->modx->lexicon('ticket_date_minutes_back', array('minutes' => $minutes)));
+                } else {
+                    return $this->modx->lexicon('ticket_date_minutes_back_less');
                 }
-                return $this->modx->lexicon('ticket_date_minutes_back_less');
             }
         }
 
@@ -755,9 +1480,10 @@ class Tickets2
             if ($hours < $this->config['dateHours']) {
                 if ($hours > 0) {
                     return $this->declension($hours,
-                        $this->modx->lexicon('ticket_date_hours_back', ['hours' => $hours]));
+                        $this->modx->lexicon('ticket_date_hours_back', array('hours' => $hours)));
+                } else {
+                    return $this->modx->lexicon('ticket_date_hours_back_less');
                 }
-                return $this->modx->lexicon('ticket_date_hours_back_less');
             }
         }
 
@@ -777,6 +1503,7 @@ class Tickets2
             }
             if ($day) {
                 $format = str_replace("day", preg_replace("#(\w{1})#", '\\\${1}', $day), $this->config['dateDay']);
+
                 return date($format, $date);
             }
         }
@@ -791,11 +1518,70 @@ class Tickets2
     }
 
     /**
+     * Declension of words
+     * This algorithm taken from https://github.com/livestreet/livestreet/blob/eca10c0186c8174b774a2125d8af3760e1c34825/engine/modules/viewer/plugs/modifier.declension.php
+     *
+     * @param int $count
+     * @param string $forms
+     * @param string $lang
+     *
+     * @return string
+     */
+    public function declension($count, $forms, $lang = null)
+    {
+        if (empty($lang)) {
+            $lang = $this->modx->getOption('cultureKey', null, 'en');
+        }
+        $forms = json_decode($forms, true);
+
+        if ($lang == 'ru') {
+            $mod100 = $count % 100;
+            switch ($count % 10) {
+                case 1:
+                    if ($mod100 == 11) {
+                        $text = $forms[2];
+                    } else {
+                        $text = $forms[0];
+                    }
+                    break;
+                case 2:
+                case 3:
+                case 4:
+                    if (($mod100 > 10) && ($mod100 < 20)) {
+                        $text = $forms[2];
+                    } else {
+                        $text = $forms[1];
+                    }
+                    break;
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 0:
+                default:
+                    $text = $forms[2];
+            }
+        } else {
+            if ($count == 1) {
+                $text = $forms[0];
+            } else {
+                $text = $forms[1];
+            }
+        }
+
+        return $text;
+
+    }
+
+    /**
      * Logs user views of a Resource. Need for new comments feature.
      *
      * @param integer $resource An id of resource
+     *
+     * @return void
      */
-    public function logView(int $resource): void
+    public function logView($resource)
     {
         $key = 'Tickets2_User';
 
@@ -806,19 +1592,19 @@ class Tickets2
             $guest_key = $_SESSION[$key];
         } else {
             if (!empty($_SESSION[$key])) {
-                $table = $this->modx->getTableName(Model\TicketView::class);
+                $table = $this->modx->getTableName('TicketView');
                 $this->modx->exec("DELETE FROM {$table} WHERE `uid` = 0 AND `guest_key` = '{$_SESSION[$key]}' AND `parent` = {$resource};");
             }
             $guest_key = '';
         }
 
-        $key = [
+        $key = array(
             'uid' => $this->modx->user->get('id'),
             'guest_key' => $guest_key,
             'parent' => $resource,
-        ];
-        if (!$view = $this->modx->getObject(Model\TicketView::class, $key)) {
-            $view = $this->modx->newObject(Model\TicketView::class);
+        );
+        if (!$view = $this->modx->getObject('TicketView', $key)) {
+            $view = $this->modx->newObject('TicketView');
             $view->fromArray($key, '', true, true);
         }
         $view->set('timestamp', date('Y-m-d H:i:s'));
@@ -830,7 +1616,7 @@ class Tickets2
      *
      * @return array
      */
-    public function getCaptcha(): array
+    public function getCaptcha()
     {
         $min = !empty($this->config['minCaptcha'])
             ? (int)$this->config['minCaptcha']
@@ -842,18 +1628,18 @@ class Tickets2
         $b = mt_rand($min, $max);
         $_SESSION['TicketComments']['captcha'] = $a + $b;
 
-        return ['a' => $a, 'b' => $b];
+        return array('a' => $a, 'b' => $b);
     }
 
     /**
      * Upload file for ticket
      *
-     * @param array $data
+     * @param $data
      * @param string $class
      *
      * @return array|string
      */
-    public function fileUpload(array $data, string $class = 'Ticket')
+    public function fileUpload($data, $class = 'Ticket')
     {
         if (!$this->authenticated || empty($this->config['allowFiles'])) {
             return $this->error('ticket_err_access_denied');
@@ -863,7 +1649,7 @@ class Tickets2
         $data['class'] = $class;
 
         /** @var modProcessorResponse $response */
-        $response = $this->runProcessor('web/file/upload', $data);
+        $response = $this->runProcessor('Tickets2\\Processors\\Web\\File\\Upload', $data);
         if ($response->isError()) {
             return $this->error($response->getMessage());
         }
@@ -882,12 +1668,12 @@ class Tickets2
     /**
      * Upload file for ticket comment
      *
-     * @param array $data
+     * @param $data
      * @param string $class
      *
      * @return array|string
      */
-    public function fileUploadComment(array $data, string $class = 'TicketComment')
+    public function fileUploadComment($data, $class = 'TicketComment')
     {
         $data['source'] = $this->config['source'];
         $data['class'] = $class;
@@ -910,39 +1696,36 @@ class Tickets2
     }
 
     /**
-     * Delete uploaded file
+     * Delete or restore uploaded file
      *
-     * @param int $id
+     * @param $id
      *
      * @return array|string
      */
-    public function fileDelete(int $id)
+    public function fileDelete($id)
     {
-        if (!$this->authenticated || empty($this->config['allowFiles'])) {
-            return $this->error('ticket_err_access_denied');
+        if (!empty($this->config['allowFiles'])) {
+            $response = $this->runProcessor('Tickets2\\Processors\\Web\\File\\Delete', ['id' => $id]);
+            if ($response->isError()) {
+                return $this->error($response->getMessage());
+            }
+            return $this->success();
         }
-        /** @var modProcessorResponse $response */
-        $response = $this->runProcessor('web/file/delete', ['id' => $id]);
-        if ($response->isError()) {
-            return $this->error($response->getMessage());
-        }
-
-        return $this->success();
+        return $this->error('tickets2_err_unknown');
     }
 
     /**
      * Sort uploaded files
      *
-     * @param array $rank
+     * @param $rank
      *
      * @return array|string
-     */
-    public function fileSort(array $rank)
-    {
+    */
+    public function fileSort($rank) {
         if (!$this->authenticated) {
             return $this->error('ticket_err_access_denied');
         }
-        $response = $this->runProcessor('web/file/sort', ['rank' => $rank]);
+        $response = $this->runProcessor('web/file/sort', array('rank' => $rank));
         if ($response->isError()) {
             return $this->error($response->getMessage());
         }
@@ -950,21 +1733,21 @@ class Tickets2
     }
 
     /**
-     * Returns error response
+     * This method returns an error of the cart
      *
      * @param string $message A lexicon key for error message
      * @param array $data Additional data
      * @param array $placeholders Array with placeholders for lexicon entry
      *
-     * @return array|string
+     * @return array|string $response
      */
-    public function error(string $message = '', array $data = [], array $placeholders = [])
+    public function error($message = '', $data = array(), $placeholders = array())
     {
-        $response = [
+        $response = array(
             'success' => false,
             'message' => $this->modx->lexicon($message, $placeholders),
             'data' => $data,
-        ];
+        );
 
         return $this->config['json_response']
             ? json_encode($response)
@@ -972,7 +1755,7 @@ class Tickets2
     }
 
     /**
-     * Returns success response
+     * This method returns an success of the cart
      *
      * @param string $message
      * @param array $data
@@ -980,13 +1763,13 @@ class Tickets2
      *
      * @return array|string
      */
-    public function success(string $message = '', array $data = [], array $placeholders = [])
+    public function success($message = '', $data = array(), $placeholders = array())
     {
-        $response = [
+        $response = array(
             'success' => true,
             'message' => $this->modx->lexicon($message, $placeholders),
             'data' => $data,
-        ];
+        );
 
         return $this->config['json_response']
             ? json_encode($response)
@@ -1001,58 +1784,18 @@ class Tickets2
      *
      * @return bool
      */
-    public function systemVersion(string $version = '2.3.0', string $dir = '>='): bool
+    public function systemVersion($version = '2.3.0', $dir = '>=')
     {
         $this->modx->getVersionData();
+
         return !empty($this->modx->version) && version_compare($this->modx->version['full_version'], $version, $dir);
     }
 
     /**
-     * Load pdoTools
-     */
-    private function loadPdoTools(): void
-    {
-        if (!$this->pdoTools) {
-            if (!class_exists('pdoTools')) {
-                require_once MODX_CORE_PATH . 'components/pdotools/model/pdotools/pdotools.class.php';
-            }
-            $this->pdoTools = new \pdoTools($this->modx);
-        }
-    }
-
-    /**
-     * Make placeholders for config
-     *
-     * @param array $config
-     * @param string $prefix
-     * @param string $suffix
-     *
-     * @return array
-     */
-    private function makePlaceholders(array $config = [], string $prefix = '[[+', string $suffix = ']]'): array
-    {
-        $result = [
-            'pl' => [],
-            'vl' => [],
-        ];
-
-        foreach ($config as $k => $v) {
-            if (is_array($v)) {
-                $result = array_merge_recursive($result, $this->makePlaceholders($v, $prefix . $k . '.', $suffix));
-            } else {
-                $result['pl'][$prefix . $k . $suffix] = '[[+' . $k . ']]';
-                $result['vl'][$prefix . $k . $suffix] = $v;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param \MODX\Revolution\modManagerController $controller
+     * @param modManagerController $controller
      * @param array $properties
      */
-    public function loadManagerFiles(\MODX\Revolution\modManagerController $controller, array $properties = []): void
+    public function loadManagerFiles($controller, $properties = [])
     {
         $tickets2AssetsUrl = $this->config['assetsUrl'];
         $connectorUrl = $this->config['connectorUrl'];
@@ -1060,10 +1803,10 @@ class Tickets2
         $tickets2JsUrl = $this->config['jsUrl'] . 'mgr/';
 
         if (!empty($properties['config'])) {
-            $tmp = [
+            $tmp = array(
                 'assets_js' => $tickets2AssetsUrl,
                 'connector_url' => $connectorUrl,
-            ];
+            );
             $controller->addHtml('<script type="text/javascript">Tickets2.config = ' . json_encode($tmp) . ';</script>');
         }
         if (!empty($properties['utils'])) {
@@ -1109,4 +1852,5 @@ class Tickets2
             $controller->addLastJavascript($tickets2JsUrl . 'author/authors.grid.js');
         }
     }
-} 
+
+}

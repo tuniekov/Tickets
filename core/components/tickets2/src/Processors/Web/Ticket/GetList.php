@@ -18,7 +18,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         if ($parents = $this->getProperty('parents')) {
             if (!is_array($parents)) {

@@ -19,7 +19,7 @@ class Get extends Processor
     /**
      * @return bool
      */
-    public function initialize(): bool
+    public function initialize()
     {
         $thread = $this->getProperty('thread');
         if (!$this->object = $this->modx->getObject($this->classKey, ['name' => $thread])) {
@@ -44,7 +44,7 @@ class Get extends Processor
     /**
      * @return string
      */
-    public function process(): string
+    public function process()
     {
         $this->getComments();
         $this->checkCommentLast();
@@ -56,7 +56,7 @@ class Get extends Processor
     /**
      * Get all comments for thread
      */
-    public function getComments(): void
+    public function getComments()
     {
         $res = [];
         $q = $this->modx->newQuery(TicketComment::class);
@@ -82,7 +82,7 @@ class Get extends Processor
     /**
      * Check and update last comment in thread
      */
-    public function checkCommentLast(): void
+    public function checkCommentLast()
     {
         if (!$this->object->get('comment_last') && $key = key(array_slice($this->comments, -1, 1, true))) {
             $comment = $this->comments[$key];
@@ -97,7 +97,7 @@ class Get extends Processor
     /**
      * Build comments tree
      */
-    public function buildTree(): void
+    public function buildTree()
     {
         $data = $this->comments;
         $this->comments = [];
@@ -113,7 +113,7 @@ class Get extends Processor
     /**
      * @return string
      */
-    public function cleanup(): string
+    public function cleanup()
     {
         return $this->outputArray($this->comments, $this->total);
     }
@@ -121,7 +121,7 @@ class Get extends Processor
     /**
      * @return array
      */
-    public function getLanguageTopics(): array
+    public function getLanguageTopics()
     {
         return $this->languageTopics;
     }

@@ -18,7 +18,7 @@ class GetList extends GetListProcessor
     /**
      * @return bool
      */
-    public function initialize(): bool
+    public function initialize()
     {
         $parent = parent::initialize();
         
@@ -35,7 +35,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         $c->innerJoin(modUser::class, 'User');
         $c->innerJoin(modUserProfile::class, 'UserProfile');
@@ -62,7 +62,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareRow(xPDOObject $object): array
+    public function prepareRow(xPDOObject $object)
     {
         $array = parent::prepareRow($object);
 

@@ -29,20 +29,22 @@ Ext.extend(Tickets2.panel.SectionSettings, MODx.VerticalTabs, {
             uncheck: {fn: MODx.fireResourceFormChange}
         };
 
-        var tabs = [{
-            title: _('tickets2_section_tab_main'),
-            hideMode: 'offsets',
-            anchor: '100%',
-            layout: 'form',
-            defaults: {
-                layout: 'form',
-                labelAlign: 'top',
-                anchor: '100%',
-                border: false,
-                labelSeparator: ''
-            },
-            items: this.getMainFields(config)
-        }];
+        var tabs = [];
+        
+        // [{
+        //     title: _('tickets2_section_tab_main'),
+        //     hideMode: 'offsets',
+        //     anchor: '100%',
+        //     layout: 'form',
+        //     defaults: {
+        //         layout: 'form',
+        //         labelAlign: 'top',
+        //         anchor: '100%',
+        //         border: false,
+        //         labelSeparator: ''
+        //     },
+        //     items: this.getMainFields(config)
+        // }];
 
         tabs.push({
             title: _('tickets2_section_tab_tickets2'),

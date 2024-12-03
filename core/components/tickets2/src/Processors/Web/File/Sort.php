@@ -12,7 +12,7 @@ class Sort extends Processor
     /**
      * @return array|string
      */
-    public function process(): array|string
+    public function process()
     {
         $rank = $this->getProperty('rank');
         foreach ($rank as $idx => $id) {

@@ -14,7 +14,7 @@ class Get extends GetProcessor
     /**
      * @return bool|string
      */
-    public function initialize(): bool|string
+    public function initialize()
     {
         $where = [];
         if ($id = (int)$this->getProperty('id')) {
@@ -48,7 +48,7 @@ class Get extends GetProcessor
     /**
      * @return array|string
      */
-    public function cleanup(): array
+    public function cleanup()
     {
         $thread = $this->object->toArray();
         return $this->success('', $thread);

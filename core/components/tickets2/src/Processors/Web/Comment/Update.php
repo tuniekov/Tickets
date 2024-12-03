@@ -18,7 +18,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool
      */
-    public function checkPermissions(): bool
+    public function checkPermissions()
     {
         $this->guest = (bool)$this->getProperty('allowGuest', false);
 
@@ -30,7 +30,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool|null|string
      */
-    public function beforeSet(): bool|string|null
+    public function beforeSet()
     {
         $time = time() - strtotime($this->object->get('createdon'));
         $ip = $this->modx->request->getClientIp();
@@ -109,7 +109,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $this->object->fromArray([
             'editedon' => time(),
@@ -129,7 +129,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $this->object->clearTicketCache();
         $this->processFiles();
@@ -141,7 +141,7 @@ class Update extends UpdateProcessor
      *
      * @return bool|int
      */
-    public function processFiles(): bool|int
+    public function processFiles()
     {
         $q = $this->modx->newQuery(TicketFile::class);
         $q->where(['class' => 'TicketComment']);

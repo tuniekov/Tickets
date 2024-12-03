@@ -18,7 +18,7 @@ class GetList extends GetListProcessor
     /**
      * @return bool
      */
-    public function initialize(): bool
+    public function initialize()
     {
         if ($this->getProperty('combo') && !$this->getProperty('limit') && $id = $this->getProperty('id')) {
             $this->item_id = $id;
@@ -55,7 +55,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function getData(): array
+    public function getData()
     {
         $data = [];
         $limit = (int)$this->getProperty('limit');
@@ -89,7 +89,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         $c->select('id,parent,pagetitle,context_key');
         $c->where([
@@ -112,7 +112,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function iterate(array $data): array
+    public function iterate(array $data)
     {
         $list = [];
         $list = $this->beforeIteration($list);
@@ -134,7 +134,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareResult(array $resourceArray): array
+    public function prepareResult(array $resourceArray)
     {
         $resourceArray['parents'] = [];
         $parents = $this->modx->getParentIds($resourceArray['id'], 2,

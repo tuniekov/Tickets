@@ -34,7 +34,7 @@ class Update extends ResourceUpdate
     /**
      * @return int|mixed|string
      */
-    public function checkFriendlyAlias(): mixed
+    public function checkFriendlyAlias()
     {
         if ($this->workingContext->getOption('tickets2.section_id_as_alias')) {
             $alias = $this->object->id;
@@ -64,7 +64,7 @@ class Update extends ResourceUpdate
     /**
      * Handle boolean properties
      */
-    protected function handleProperties(): void
+    protected function handleProperties()
     {
         $properties = $this->getProperty('properties');
         if (!empty($properties['tickets2'])) {

@@ -13,7 +13,7 @@ class Get extends GetProcessor
     /**
      * @return array|string
      */
-    public function cleanup(): array
+    public function cleanup()
     {
         $comment = $this->object->toArray();
         $comment['text'] = html_entity_decode($comment['text']);

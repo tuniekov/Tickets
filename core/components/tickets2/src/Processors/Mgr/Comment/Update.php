@@ -18,7 +18,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool|null|string
      */
-    public function beforeSet(): bool|null|string
+    public function beforeSet()
     {
         if (!$this->getProperty('name')) {
             $this->unsetProperty('name');
@@ -46,7 +46,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $text = $this->getProperty('text');
 
@@ -66,7 +66,7 @@ class Update extends UpdateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $new_thread = $this->object->get('thread');
         if ($this->old_thread != $new_thread) {

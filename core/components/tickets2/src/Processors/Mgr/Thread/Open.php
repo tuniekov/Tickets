@@ -17,7 +17,7 @@ class Open extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSet(): bool
+    public function beforeSet()
     {
         $this->properties = [];
         return true;
@@ -26,7 +26,7 @@ class Open extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $this->object->fromArray([
             'closed' => 0,
@@ -38,7 +38,7 @@ class Open extends UpdateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $this->modx->cacheManager->delete('tickets2/latest.comments');
         $this->modx->cacheManager->delete('tickets2/latest.tickets2');
@@ -49,7 +49,7 @@ class Open extends UpdateProcessor
     /**
      * Log manager action
      */
-    public function logManagerAction(): void
+    public function logManagerAction()
     {
         $this->modx->logManagerAction($this->objectType . '_open', $this->classKey,
             $this->object->get($this->primaryKeyField));

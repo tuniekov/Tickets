@@ -13,7 +13,7 @@ class Publish extends ResourcePublish
     /**
      * Fire after publish event
      */
-    public function fireAfterPublish(): void
+    public function fireAfterPublish()
     {
         parent::fireAfterPublish();
         $this->sendTicketMails();
@@ -22,7 +22,7 @@ class Publish extends ResourcePublish
     /**
      * Call method for notify users about publish ticket
      */
-    protected function sendTicketMails(): void
+    protected function sendTicketMails()
     {
         /** @var \Tickets2 $Tickets2 */
         if ($Tickets2 = $this->modx->getService('Tickets2')) {

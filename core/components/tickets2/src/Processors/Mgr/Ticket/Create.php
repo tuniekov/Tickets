@@ -59,7 +59,7 @@ class Create extends ResourceCreate
     /**
      * @return mixed
      */
-    public function setFieldDefaults(): mixed
+    public function setFieldDefaults()
     {
         $set = parent::setFieldDefaults();
 
@@ -135,7 +135,7 @@ class Create extends ResourceCreate
     /**
      * @return string
      */
-    public function prepareAlias(): string
+    public function prepareAlias()
     {
         $alias = parent::prepareAlias();
         if ($this->modx->context->key != 'mgr') {
@@ -205,7 +205,7 @@ class Create extends ResourceCreate
     /**
      * @return mixed
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $uri = $this->object->get('uri');
         $new_uri = str_replace('%id', $this->object->get('id'), $uri);
@@ -230,7 +230,7 @@ class Create extends ResourceCreate
     /**
      * Call method for notify users about new ticket in section
      */
-    protected function sendTicketMails(): void
+    protected function sendTicketMails()
     {
         /** @var \Tickets2 $Tickets2 */
         if ($Tickets2 = $this->modx->getService('Tickets2')) {
@@ -243,7 +243,7 @@ class Create extends ResourceCreate
     /**
      * @return bool
      */
-    public function clearCache(): bool
+    public function clearCache()
     {
         $clear = false;
         /** @var Tickets2Section $section */
@@ -267,7 +267,7 @@ class Create extends ResourceCreate
     /**
      * @return array
      */
-    public function addTemplateVariables(): array
+    public function addTemplateVariables()
     {
         if ($this->modx->context->key != 'mgr') {
             $values = [];
@@ -290,7 +290,7 @@ class Create extends ResourceCreate
     /**
      * @return mixed
      */
-    public function cleanup(): mixed
+    public function cleanup()
     {
         $this->processFiles();
 

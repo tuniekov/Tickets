@@ -7,14 +7,14 @@ use Tickets2\Model\TicketComment;
 
 class Get extends GetProcessor
 {
-    public $objectType = 'TicketComment';
+    // public $objectType = 'TicketComment';
     public $classKey = TicketComment::class;
     public $languageTopics = ['tickets2:default'];
 
     /**
      * @return array
      */
-    public function cleanup(): array
+    public function cleanup()
     {
         $comment = $this->object->toArray();
         $comment['createdon'] = $this->formatDate($comment['createdon']);
@@ -32,7 +32,7 @@ class Get extends GetProcessor
      *
      * @return string
      */
-    protected function formatDate(string $date = ''): string
+    protected function formatDate(string $date = '')
     {
         if (empty($date) || $date == '0000-00-00 00:00:00') {
             return $this->modx->lexicon('no');

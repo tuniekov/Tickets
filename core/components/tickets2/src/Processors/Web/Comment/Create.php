@@ -24,7 +24,7 @@ class Create extends CreateProcessor
     /**
      * @return bool
      */
-    public function checkPermissions(): bool
+    public function checkPermissions()
     {
         $this->guest = (bool)$this->getProperty('allowGuest', false);
         $this->unsetProperty('allowGuest');
@@ -39,7 +39,7 @@ class Create extends CreateProcessor
     /**
      * @return bool|null|string
      */
-    public function beforeSet(): bool|string|null
+    public function beforeSet()
     {
         $tid = $this->getProperty('thread');
         if (!$this->thread = $this->modx->getObject(TicketThread::class,
@@ -116,7 +116,7 @@ class Create extends CreateProcessor
     /**
      * @return bool|null|string
      */
-    public function beforeSave(): bool|string|null
+    public function beforeSave()
     {
         /** @var TicketThread $thread */
         if ($thread = $this->object->getOne('Thread')) {
@@ -144,7 +144,7 @@ class Create extends CreateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         if ($this->object->get('published')) {
             $this->thread->fromArray([
@@ -175,7 +175,7 @@ class Create extends CreateProcessor
      *
      * @return bool|int
      */
-    public function processFiles(): bool|int
+    public function processFiles()
     {
         $q = $this->modx->newQuery(TicketFile::class);
         $q->where(['class' => 'TicketComment']);

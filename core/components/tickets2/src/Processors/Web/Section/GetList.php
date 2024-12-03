@@ -20,7 +20,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         $context = array_map('trim', explode(',', $this->getProperty('context', $this->modx->context->key)));
 
@@ -107,7 +107,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function iterate(array $data): array
+    public function iterate($data)
     {
         $list = [];
         $list = $this->beforeIteration($list);
@@ -138,7 +138,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareRow(xPDOObject $object): array
+    public function prepareRow(xPDOObject $object)
     {
         return $object->toArray();
     }

@@ -21,7 +21,7 @@ class Upload extends Processor
     /**
      * @return bool|null|string
      */
-    public function initialize(): bool|string|null
+    public function initialize()
     {
         if (!$this->modx->hasPermission($this->permission)) {
             return $this->modx->lexicon('access_denied');
@@ -54,7 +54,7 @@ class Upload extends Processor
     /**
      * @return array|string
      */
-    public function process(): array|string
+    public function process()
     {
         if (!$data = $this->handleFile()) {
             return $this->failure($this->modx->lexicon('ticket_err_file_ns'));
@@ -168,7 +168,7 @@ class Upload extends Processor
     /**
      * @return array|bool
      */
-    public function handleFile(): array|bool
+    public function handleFile()
     {
         $tf = tempnam(MODX_BASE_PATH, 'tkt_');
 

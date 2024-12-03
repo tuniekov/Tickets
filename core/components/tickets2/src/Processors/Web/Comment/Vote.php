@@ -22,7 +22,7 @@ class Vote extends CreateProcessor
     /**
      * @return bool|null|string
      */
-    public function beforeSet(): bool|string|null
+    public function beforeSet()
     {
         $id = (int)$this->getProperty('id');
 
@@ -44,7 +44,7 @@ class Vote extends CreateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         /** @var TicketThread $thread */
         if ($thread = $this->comment->getOne('Thread')) {
@@ -85,7 +85,7 @@ class Vote extends CreateProcessor
     /**
      * @return array|string
      */
-    public function cleanup(): array
+    public function cleanup()
     {
         $rating = $this->comment->updateRating();
 

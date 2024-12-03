@@ -13,7 +13,7 @@ class Rebuild extends Processor
     /**
      * @return array|string
      */
-    public function process(): array
+    public function process()
     {
         $time = time();
         $time_limit = @ini_get('max_execution_time') - 20;
@@ -51,7 +51,7 @@ class Rebuild extends Processor
      *
      * @return array|string
      */
-    public function cleanup(int $processed = 0): array
+    public function cleanup(int $processed = 0)
     {
         return $this->success('', [
             'total' => $this->modx->getCount(modUser::class),
@@ -62,7 +62,7 @@ class Rebuild extends Processor
     /**
      * Clean tables before rebuild
      */
-    protected function cleanTables(): void
+    protected function cleanTables()
     {
         /** @var xPDOQuery $c */
         $c = $this->modx->newQuery(TicketAuthor::class);

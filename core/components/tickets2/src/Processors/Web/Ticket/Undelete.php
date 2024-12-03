@@ -2,11 +2,11 @@
 
 namespace Tickets2\Processors\Web\Ticket;
 
-// use MODX\Revolution\Processors\Resource\Undelete;
+use MODX\Revolution\Processors\Resource\Undelete as UndeleteResource;
 use MODX\Revolution\modResource;
 use Tickets2\Model\Ticket;
 
-class Undelete extends MODX\Revolution\Processors\Resource\Undelete
+class Undelete extends UndeleteResource
 {
     public $classKey = Ticket::class;
     public $permission = 'ticket_delete';
@@ -14,7 +14,7 @@ class Undelete extends MODX\Revolution\Processors\Resource\Undelete
     /**
      * @return bool
      */
-    public function checkPermissions(): bool
+    public function checkPermissions()
     {
         $id = $this->getProperty('id', false);
         $this->resource = $this->modx->getObject(modResource::class, $id);

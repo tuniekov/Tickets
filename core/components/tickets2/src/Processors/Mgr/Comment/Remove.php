@@ -9,7 +9,7 @@ use Tickets2\Model\TicketThread;
 class Remove extends RemoveProcessor
 {
     public $checkRemovePermission = true;
-    public $objectType = 'TicketComment';
+    // public $objectType = 'TicketComment';
     public $classKey = TicketComment::class;
     public $languageTopics = ['tickets2'];
     public $beforeRemoveEvent = 'OnBeforeCommentRemove';
@@ -20,7 +20,7 @@ class Remove extends RemoveProcessor
     /**
      * @return bool|null|string
      */
-    public function initialize(): bool|string|null
+    public function initialize()
     {
         $parent = parent::initialize();
         if ($this->checkRemovePermission && !$this->modx->hasPermission($this->permission)) {
@@ -33,7 +33,7 @@ class Remove extends RemoveProcessor
     /**
      * @return bool
      */
-    public function beforeRemove(): bool
+    public function beforeRemove()
     {
         $this->getChildren($this->object);
         $children = $this->modx->getIterator(TicketComment::class, ['id:IN' => $this->children]);
@@ -48,7 +48,7 @@ class Remove extends RemoveProcessor
     /**
      * @param TicketComment $parent
      */
-    protected function getChildren(TicketComment $parent): void
+    protected function getChildren(TicketComment $parent)
     {
         $children = $parent->getMany('Children');
         if (count($children) > 0) {
@@ -63,7 +63,7 @@ class Remove extends RemoveProcessor
     /**
      * @return bool
      */
-    public function afterRemove(): bool
+    public function afterRemove()
     {
         $this->object->clearTicketCache();
         /** @var TicketThread $thread */
@@ -80,7 +80,7 @@ class Remove extends RemoveProcessor
     /**
      * Log manager action
      */
-    public function logManagerAction(): void
+    public function logManagerAction()
     {
         $this->modx->logManagerAction($this->objectType . '_remove', $this->classKey,
             $this->object->get($this->primaryKeyField));

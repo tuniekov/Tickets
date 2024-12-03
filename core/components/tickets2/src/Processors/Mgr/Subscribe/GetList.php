@@ -11,14 +11,14 @@ use xPDO\Om\xPDOQuery;
 
 class GetList extends GetListProcessor
 {
-    public $objectType = 'modUser';
+    // public $objectType = 'modUser';
     public $classKey = modUser::class;
     public $languageTopics = ['tickets2:default'];
     public $defaultSortField = 'modUser.id';
     public $defaultSortDirection = 'DESC';
     public array $subscribers = [];
 
-    public function beforeQuery(): bool
+    public function beforeQuery()
     {
         $target = (int)$this->getProperty('parents');
         if ($section = $this->modx->getObject(Tickets2Section::class, $target, false)) {
@@ -31,7 +31,7 @@ class GetList extends GetListProcessor
         return true;
     }
 
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         $c->leftJoin(modUserProfile::class, 'Profile');
         if (empty($this->subscribers)) {
@@ -60,7 +60,7 @@ class GetList extends GetListProcessor
         return $c;
     }
 
-    public function prepareQueryAfterCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryAfterCount(xPDOQuery $c)
     {
         $c->select($this->modx->getSelectColumns(modUser::class, 'modUser'));
         $c->select($this->modx->getSelectColumns(modUserProfile::class, 'Profile', '', ['fullname', 'email']));
@@ -73,7 +73,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareRow(xPDOObject $object): array
+    public function prepareRow(xPDOObject $object)
     {
         $array = parent::prepareRow($object);
 

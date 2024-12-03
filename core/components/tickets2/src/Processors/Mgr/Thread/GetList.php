@@ -22,7 +22,7 @@ class GetList extends GetListProcessor
      *
      * @return xPDOQuery
      */
-    public function prepareQueryBeforeCount(xPDOQuery $c): xPDOQuery
+    public function prepareQueryBeforeCount(xPDOQuery $c)
     {
         $c->leftJoin(Ticket::class, 'Ticket');
         $c->select($this->modx->getSelectColumns(TicketThread::class, 'TicketThread'));
@@ -59,7 +59,7 @@ class GetList extends GetListProcessor
      *
      * @return array
      */
-    public function prepareRow(xPDOObject $object): array
+    public function prepareRow(xPDOObject $object)
     {
         if ($this->getProperty('combo')) {
             return $object->get([

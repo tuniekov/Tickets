@@ -18,7 +18,7 @@ class Unpublish extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSet(): bool
+    public function beforeSet()
     {
         $this->properties = [];
         return true;
@@ -27,7 +27,7 @@ class Unpublish extends UpdateProcessor
     /**
      * @return bool
      */
-    public function beforeSave(): bool
+    public function beforeSave()
     {
         $this->object->set('published', 0);
         return parent::beforeSave();
@@ -36,7 +36,7 @@ class Unpublish extends UpdateProcessor
     /**
      * @return bool
      */
-    public function afterSave(): bool
+    public function afterSave()
     {
         $this->object->clearTicketCache();
         /** @var TicketThread $thread */
@@ -57,7 +57,7 @@ class Unpublish extends UpdateProcessor
     /**
      * Send email notifications
      */
-    protected function sendCommentMails(): void
+    protected function sendCommentMails()
     {
         /** @var TicketThread $thread */
         if ($thread = $this->object->getOne('Thread')) {
@@ -72,7 +72,7 @@ class Unpublish extends UpdateProcessor
     /**
      * Log manager action
      */
-    public function logManagerAction(): void
+    public function logManagerAction()
     {
         $this->modx->logManagerAction($this->objectType . '_unpublish', $this->classKey,
             $this->object->get($this->primaryKeyField));
