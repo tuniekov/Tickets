@@ -627,13 +627,13 @@ class Tickets2Package
             xPDOTransport::UNIQUE_KEY => array('name'),
             xPDOTransport::UPDATE_OBJECT => !empty($this->config['update']['policy_templates']),
             xPDOTransport::RELATED_OBJECTS => true,
-            xPDOTransport::RELATED_OBJECT_ATTRIBUTES => array(
-                'Permissions' => array(
+            xPDOTransport::RELATED_OBJECT_ATTRIBUTES => [
+                'Permissions' => [
                     xPDOTransport::PRESERVE_KEYS => false,
                     xPDOTransport::UPDATE_OBJECT => !empty($this->config['update']['permission']),
-                    xPDOTransport::UNIQUE_KEY => array('template', 'name'),
-                ),
-            ),
+                    xPDOTransport::UNIQUE_KEY => ['template', 'name'],
+                ],
+            ],
         ];
         foreach ($policy_templates as $name => $data) {
             $permissions = array();
@@ -641,21 +641,21 @@ class Tickets2Package
                 foreach ($data['permissions'] as $name2 => $data2) {
                     /** @var $permission modAccessPermission */
                     $permission = $this->modx->newObject(modAccessPermission::class);
-                    $permission->fromArray(array_merge(array(
+                    $permission->fromArray(array_merge([
                             'name' => $name2,
                             'description' => $name2,
                             'value' => true,
-                        ), $data2)
+                        ], $data2)
                         , '', true, true);
                     $permissions[] = $permission;
                 }
             }
             /** @var $permission modAccessPolicyTemplate */
             $permission = $this->modx->newObject(modAccessPolicyTemplate::class);
-            $permission->fromArray(array_merge(array(
+            $permission->fromArray(array_merge([
                     'name' => $name,
                     'lexicon' => $this->config['name_lower'] . ':permissions',
-                ), $data)
+                ], $data)
                 , '', true, true);
             if (!empty($permissions)) {
                 $permission->addMany($permissions);
